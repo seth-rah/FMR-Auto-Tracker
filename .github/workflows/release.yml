@@ -1,0 +1,43 @@
+name: Build Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+
+    - name: Build and Publish
+      run: dotnet publish --configuration Release -p:AssemblyName=FMR-Auto-Tracker
+
+    - name: Create zip artifact
+      shell: pwsh
+      run: |
+        $sha = $env:GITHUB_SHA.Substring(0, 7)
+        $date = (Get-Date).ToString("yyyyMMdd-HHmmss")
+        $version = "$date-$sha"
+        Write-Host "VERSION=$version"
+        Compress-Archive -Path ./bin/Release/net10.0-windows/publish/* -DestinationPath ./FMR-Auto-Tracker-$version.zip
+
+    - name: Upload Release Asset
+      uses: softprops/action-gh-release@v2
+      with:
+        files: ./FMR-Auto-Tracker-*.zip
+        prerelease: false
+        draft: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
