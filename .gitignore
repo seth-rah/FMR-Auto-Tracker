@@ -1,0 +1,135 @@
+# .NET gitignore template
+# https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio 2015/2017 cache/options directory
+.vs/
+
+# User-specific files (VisualStudio)
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# User-specific files (VSCode)
+.vscode/
+
+# Visual Studio cache options
+*.opts
+*.dbmdl
+*.dbproj.schemaview
+*.jfm
+*.pfx
+*.publishsettings
+*.mdf
+*.ldf
+
+# Visual Studio cache files
+*.cache
+*.dbc
+*.mdb
+
+# Visual Studio backup files
+*.bak
+*.tlog
+
+# Results to be ignored by NuGet/Package restore
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# NuGet
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+
+# Package restore
+[Nn]uget.exe
+[Nn]uget.exe.stacktrace
+[Nn]uget.exe.restore
+[Ff]reshPack.lock.json
+FreshPack.lock.json
+
+# Visual Studio cache files
+[Ff]reshPack.lock.json
+
+# Dotnet CLI
+project.assets.json
+project.nuget.cache
+
+# Microsoft Azure Build Output
+csx/
+*.build.csdef
+
+# Microsoft Azure Emulator
+ecf/
+rcf/
+
+# Windows Store app package
+AppPackages/
+BundleArtifacts/
+
+# Visual Studio traces
+*.trx
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# Visual Studio code
+.vscode/
+*.code-workspace
+
+# Local History for Visual Studio
+.localhistory/
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Razer/Synapse
+libs/
+
+# Crash dumps
+crashdumps/
+
+# Build machine
+_Crh*
+_rh.*
+
+# NuGet Packages
+*.snupkg
+*.packages
+
+# Test Results
+[Tt]est[Rr]esult*/
+*.trx
+
+# .NET Fakes
+FakesAssemblies/
+
+# NuGet restore log
+restore.log

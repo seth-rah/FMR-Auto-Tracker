@@ -1,0 +1,46 @@
+name: Build Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+      - '*alpha*'
+      - '*beta*'
+      - '*rc*'
+  workflow_dispatch:
+    inputs:
+      prerelease:
+        description: 'Create as prerelease'
+        required: false
+        default: 'false'
+
+jobs:
+  build:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x'
+
+    - name: Build and Publish
+      run: dotnet publish --configuration Release -p:AssemblyName=FMR-Auto-Tracker
+
+    - name: Create zip artifact
+      shell: pwsh
+      run: |
+        Compress-Archive -Path ./bin/Release/net10.0-windows/publish/* -DestinationPath ./FMR-Auto-Tracker.zip
+
+    - name: Upload Release Asset
+      uses: softprops/action-gh-release@v2
+      with:
+        files: ./FMR-Auto-Tracker.zip
+        prerelease: ${{ github.event.inputs.prerelease || contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
