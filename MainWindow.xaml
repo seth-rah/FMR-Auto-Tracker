@@ -1,0 +1,433 @@
+<Window x:Class="YuGiOh_Forbidden_Memories_Monitor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Yu-Gi-Oh! Forbidden Memories Monitor"
+        Height="900" Width="800"
+        MinHeight="600" MinWidth="700"
+        Background="#1E1E2E"
+        SizeToContent="WidthAndHeight"
+        ResizeMode="CanResize">
+    <Grid Margin="15">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Total Annihilation" Foreground="#00BCD4" FontSize="14" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <TextBlock Text="Game ID" Foreground="#FFC107" FontSize="16" FontWeight="Bold" Margin="0,0,0,5"/>
+                    <TextBlock x:Name="GameIdText" Text="[Not attached]" Foreground="#00FF00" FontFamily="Consolas" FontSize="14"/>
+                </StackPanel>
+            </Grid>
+            
+            <TextBlock Text="Life Points" Foreground="#FFC107" FontSize="13" FontWeight="Bold" Margin="0,15,0,10"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Player 1" Foreground="#FFC107" FontSize="13" FontWeight="Bold"/>
+                <Border Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Width="2" Background="#444466" Margin="15,5"/>
+                <TextBlock Grid.Row="0" Grid.Column="2" Text="Player 2" Foreground="#FFC107" FontSize="13" FontWeight="Bold" Margin="15,0,0,0"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" x:Name="P1LifePointsText" Text="0" Foreground="#00FF00" FontSize="28" FontWeight="Bold"/>
+                <TextBlock Grid.Row="1" Grid.Column="2" x:Name="P2LifePointsText" Text="0" Foreground="#FF6666" FontSize="28" FontWeight="Bold" Margin="15,0,0,0"/>
+            </Grid>
+                
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Score" Foreground="#FFC107" FontSize="13" FontWeight="Bold"/>
+                <Border Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Width="2" Background="#444466" Margin="15,5"/>
+                <TextBlock Grid.Row="0" Grid.Column="2" Text="Starchips:" Foreground="#FFC107" FontSize="13" FontWeight="Bold" Margin="15,0,0,0"/>
+                <TextBlock Grid.Row="1" Grid.Column="0" x:Name="DuelScoreText" Text="0 = --" Foreground="#00FF00" FontSize="28" FontWeight="Bold"/>
+                <TextBlock Grid.Row="1" Grid.Column="2" x:Name="StarchipsText" Text="0" Foreground="#00FF00" FontSize="28" FontWeight="Bold" Margin="15,0,0,0"/>
+            </Grid>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="0" Grid.Column="1" VerticalAlignment="Top" MaxHeight="250">
+            <Button x:Name="AttachDetachButton" Content="Attach" Width="120" Height="40" Click="AttachDetachButton_Click" Background="#4CAF50" Foreground="White" FontWeight="Bold"/>
+            <TextBlock Text="Using this tool is not&#x0a;allowed when speedrunning" Foreground="#FF6666" FontSize="13" FontWeight="Bold" Margin="0,10,0,0"/>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,15">
+            <TextBlock Text="Duel Stats" Foreground="#FFC107" FontSize="13" FontWeight="Bold" Margin="0,15,0,10"/>
+            <Border Background="#2a2a3a" Padding="6" BorderBrush="#444466" BorderThickness="1">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="160"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Cards Used" Foreground="#CCCCCC" FontSize="13" VerticalAlignment="Center"/>
+                    <Border Grid.Row="0" Grid.Column="1" x:Name="CardsUsedCell1" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="CardsUsedRange1" Text="0-8" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="CardsUsedScore1" Text="+15" Foreground="#00FF00" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="0" Grid.Column="2" x:Name="CardsUsedCell2" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="CardsUsedRange2" Text="9-12" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="CardsUsedScore2" Text="+12" Foreground="#00FF00" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="0" Grid.Column="3" x:Name="CardsUsedCell3" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="CardsUsedRange3" Text="13-32" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="CardsUsedScore3" Text="+0" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="0" Grid.Column="4" x:Name="CardsUsedCell4" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="CardsUsedRange4" Text="33-36" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="CardsUsedScore4" Text="-5" Foreground="#FF6666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="0" Grid.Column="5" x:Name="CardsUsedCell5" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="CardsUsedRange5" Text="37+" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="CardsUsedScore5" Text="-7" Foreground="#FF6666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Duel Turns" Foreground="#CCCCCC" FontSize="13" VerticalAlignment="Center"/>
+                    <Border Grid.Row="1" Grid.Column="1" x:Name="TurnsCell1" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="TurnsRange1" Text="0-4" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="TurnsScore1" Text="+12" Foreground="#00FF00" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="1" Grid.Column="2" x:Name="TurnsCell2" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="TurnsRange2" Text="5-8" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="TurnsScore2" Text="+8" Foreground="#00FF00" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="1" Grid.Column="3" x:Name="TurnsCell3" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="TurnsRange3" Text="9-28" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="TurnsScore3" Text="+0" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="1" Grid.Column="4" x:Name="TurnsCell4" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="TurnsRange4" Text="29-32" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="TurnsScore4" Text="-8" Foreground="#FF6666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="1" Grid.Column="5" x:Name="TurnsCell5" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="TurnsRange5" Text="33+" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="TurnsScore5" Text="-12" Foreground="#FF6666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Effective Atk" Foreground="#CCCCCC" FontSize="13" VerticalAlignment="Center"/>
+                    <Border Grid.Row="2" Grid.Column="1" x:Name="AtkCell1" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="AtkRange1" Text="0-1" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="AtkScore1" Text="+4" Foreground="#00FF00" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="2" Grid.Column="2" x:Name="AtkCell2" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="AtkRange2" Text="2-3" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="AtkScore2" Text="+2" Foreground="#00FF00" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="2" Grid.Column="3" x:Name="AtkCell3" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="AtkRange3" Text="4-9" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="AtkScore3" Text="+0" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="2" Grid.Column="4" x:Name="AtkCell4" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="AtkRange4" Text="10-19" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="AtkScore4" Text="-2" Foreground="#FF6666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="2" Grid.Column="5" x:Name="AtkCell5" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="AtkRange5" Text="20+" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="AtkScore5" Text="-4" Foreground="#FF6666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Defensive Wins" Foreground="#CCCCCC" FontSize="13" VerticalAlignment="Center"/>
+                    <Border Grid.Row="3" Grid.Column="1" x:Name="DefWinsCell1" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="DefWinsRange1" Text="0-1" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="DefWinsScore1" Text="+0" Foreground="#00FF00" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="3" Grid.Column="2" x:Name="DefWinsCell2" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="DefWinsRange2" Text="2-5" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="DefWinsScore2" Text="-10" Foreground="#FF6666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="3" Grid.Column="3" x:Name="DefWinsCell3" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="DefWinsRange3" Text="6-9" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="DefWinsScore3" Text="-20" Foreground="#FF6666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="3" Grid.Column="4" x:Name="DefWinsCell4" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="DefWinsRange4" Text="10-14" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="DefWinsScore4" Text="-30" Foreground="#FF6666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="3" Grid.Column="5" x:Name="DefWinsCell5" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="DefWinsRange5" Text="15+" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="DefWinsScore5" Text="-40" Foreground="#FF6666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Face-Down" Foreground="#CCCCCC" FontSize="13" VerticalAlignment="Center"/>
+                    <Border Grid.Row="4" Grid.Column="1" x:Name="FaceDownCell1" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="FaceDownRange1" Text="0" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="FaceDownScore1" Text="+0" Foreground="#00FF00" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="4" Grid.Column="2" x:Name="FaceDownCell2" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="FaceDownRange2" Text="1-10" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="FaceDownScore2" Text="-2" Foreground="#FF6666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="4" Grid.Column="3" x:Name="FaceDownCell3" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="FaceDownRange3" Text="11-20" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="FaceDownScore3" Text="-4" Foreground="#FF6666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="4" Grid.Column="4" x:Name="FaceDownCell4" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="FaceDownRange4" Text="21-30" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="FaceDownScore4" Text="-6" Foreground="#FF6666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="4" Grid.Column="5" x:Name="FaceDownCell5" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="FaceDownRange5" Text="31+" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="FaceDownScore5" Text="-8" Foreground="#FF6666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <TextBlock Grid.Row="5" Grid.Column="0" Text="Fusion" Foreground="#CCCCCC" FontSize="13" VerticalAlignment="Center"/>
+                    <Border Grid.Row="5" Grid.Column="1" x:Name="FusionCell1" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="FusionRange1" Text="0" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="FusionScore1" Text="+4" Foreground="#00FF00" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="5" Grid.Column="2" x:Name="FusionCell2" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="FusionRange2" Text="1-4" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="FusionScore2" Text="+0" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="5" Grid.Column="3" x:Name="FusionCell3" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="FusionRange3" Text="5-9" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="FusionScore3" Text="-4" Foreground="#FF6666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="5" Grid.Column="4" x:Name="FusionCell4" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="FusionRange4" Text="10-14" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="FusionScore4" Text="-8" Foreground="#FF6666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="5" Grid.Column="5" x:Name="FusionCell5" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="FusionRange5" Text="15+" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="FusionScore5" Text="-12" Foreground="#FF6666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <TextBlock Grid.Row="6" Grid.Column="0" Text="Equip Magic" Foreground="#CCCCCC" FontSize="13" VerticalAlignment="Center"/>
+                    <Border Grid.Row="6" Grid.Column="1" x:Name="EquipCell1" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="EquipRange1" Text="0" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="EquipScore1" Text="+4" Foreground="#00FF00" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="6" Grid.Column="2" x:Name="EquipCell2" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="EquipRange2" Text="1-4" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="EquipScore2" Text="+0" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="6" Grid.Column="3" x:Name="EquipCell3" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="EquipRange3" Text="5-9" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="EquipScore3" Text="-4" Foreground="#FF6666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="6" Grid.Column="4" x:Name="EquipCell4" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="EquipRange4" Text="10-14" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="EquipScore4" Text="-8" Foreground="#FF6666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="6" Grid.Column="5" x:Name="EquipCell5" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="EquipRange5" Text="15+" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="EquipScore5" Text="-12" Foreground="#FF6666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <TextBlock Grid.Row="7" Grid.Column="0" Text="Pure Magic" Foreground="#CCCCCC" FontSize="13" VerticalAlignment="Center"/>
+                    <Border Grid.Row="7" Grid.Column="1" x:Name="MagicCell1" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="MagicRange1" Text="0" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="MagicScore1" Text="+2" Foreground="#00FF00" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="7" Grid.Column="2" x:Name="MagicCell2" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="MagicRange2" Text="1-3" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="MagicScore2" Text="-4" Foreground="#FF6666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="7" Grid.Column="3" x:Name="MagicCell3" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="MagicRange3" Text="4-6" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="MagicScore3" Text="-8" Foreground="#FF6666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="7" Grid.Column="4" x:Name="MagicCell4" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="MagicRange4" Text="7-9" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="MagicScore4" Text="-12" Foreground="#FF6666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="7" Grid.Column="5" x:Name="MagicCell5" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="MagicRange5" Text="10+" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="MagicScore5" Text="-16" Foreground="#FF6666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <TextBlock Grid.Row="8" Grid.Column="0" Text="Trigger Trap" Foreground="#CCCCCC" FontSize="13" VerticalAlignment="Center"/>
+                    <Border Grid.Row="8" Grid.Column="1" x:Name="TrapCell1" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="TrapRange1" Text="0" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="TrapScore1" Text="+2" Foreground="#00FF00" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="8" Grid.Column="2" x:Name="TrapCell2" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="TrapRange2" Text="1-2" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="TrapScore2" Text="-8" Foreground="#FF6666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="8" Grid.Column="3" x:Name="TrapCell3" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="TrapRange3" Text="3-4" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="TrapScore3" Text="-16" Foreground="#FF6666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="8" Grid.Column="4" x:Name="TrapCell4" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="TrapRange4" Text="5-6" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="TrapScore4" Text="-24" Foreground="#FF6666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="8" Grid.Column="5" x:Name="TrapCell5" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="TrapRange5" Text="7+" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="TrapScore5" Text="-32" Foreground="#FF6666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    
+                    <TextBlock Grid.Row="9" Grid.Column="0" Text="Remaining LP" Foreground="#CCCCCC" FontSize="13" VerticalAlignment="Center"/>
+                    <Border Grid.Row="9" Grid.Column="1" x:Name="LPCell1" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="LPRange1" Text="8000+" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="LPScore1" Text="+6" Foreground="#00FF00" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="9" Grid.Column="2" x:Name="LPCell2" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="LPRange2" Text="7000-7999" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="LPScore2" Text="+4" Foreground="#00FF00" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="9" Grid.Column="3" x:Name="LPCell3" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="LPRange3" Text="1000-6999" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="LPScore3" Text="+0" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="9" Grid.Column="4" x:Name="LPCell4" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="LPRange4" Text="100-999" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="LPScore4" Text="-5" Foreground="#FF6666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Row="9" Grid.Column="5" x:Name="LPCell5" Background="#2a2a3a" Padding="4" Margin="1">
+                        <StackPanel>
+                            <TextBlock x:Name="LPRange5" Text="0-99" Foreground="#666666" FontSize="13" TextAlignment="Center"/>
+                            <TextBlock x:Name="LPScore5" Text="-7" Foreground="#FF6666" FontSize="13" TextAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Border>
+        </StackPanel>
+        
+        <StackPanel Grid.Row="2" Margin="0,15,0,0">
+            <TextBlock x:Name="StatusText" Text="Status: Not Attached" Foreground="#00BCD4" FontSize="14"/>
+            <Expander x:Name="DebugExpander" Header="Debug Log" Foreground="#FFC107" Margin="0,10,0,0" Visibility="Collapsed">
+                <ScrollViewer Height="200" VerticalScrollBarVisibility="Auto">
+                    <TextBlock x:Name="DebugLogText" Text="" Foreground="#00FF00" FontFamily="Consolas" FontSize="11" TextWrapping="Wrap"/>
+                </ScrollViewer>
+            </Expander>
+        </StackPanel>
+    </Grid>
+</Window>
