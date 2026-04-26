@@ -4,7 +4,7 @@ using System.Windows;
 
 namespace YuGiOh_Forbidden_Memories_Monitor
 {
-    public partial class App : Application
+    public sealed partial class App : Application
     {
         public static bool DebugMode { get; private set; }
 

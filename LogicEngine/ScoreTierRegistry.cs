@@ -14,6 +14,19 @@ namespace YuGiOh_Forbidden_Memories_Monitor.LogicEngine
         public static IReadOnlyList<ScoreTier> TrapsTriggered => _trapsTriggered;
         public static IReadOnlyList<ScoreTier> CardsUsed => _cardsUsed;
         public static IReadOnlyList<ScoreTier> LifePoints => _lifePoints;
+        public static IReadOnlyList<ScoreTier> ComboPlays => _comboPlays;
+
+        public static int Evaluate(IReadOnlyList<ScoreTier> tiers, int value)
+        {
+            foreach (var tier in tiers)
+            {
+                if (value >= tier.MinValue && value <= tier.MaxValue)
+                {
+                    return tier.Score;
+                }
+            }
+            return 0;
+        }
 
         private static readonly List<ScoreTier> _turns = new()
         {
@@ -105,17 +118,14 @@ namespace YuGiOh_Forbidden_Memories_Monitor.LogicEngine
             new(0, 99, -7)
         };
 
-        public static int Evaluate(IReadOnlyList<ScoreTier> tiers, int value)
+        private static readonly List<ScoreTier> _comboPlays = new()
         {
-            foreach (var tier in tiers)
-            {
-                if (value >= tier.MinValue && value <= tier.MaxValue)
-                {
-                    return tier.Score;
-                }
-            }
-            return 0;
-        }
+            new(0, 0, 2),
+            new(1, 2, 0),
+            new(3, 5, -2),
+            new(6, 9, -4),
+            new(10, int.MaxValue, -6)
+        };
     }
 
     public readonly struct ScoreTier
@@ -133,8 +143,8 @@ namespace YuGiOh_Forbidden_Memories_Monitor.LogicEngine
 
         public bool Contains(int value) => value >= MinValue && value <= MaxValue;
 
-        public string GetRangeDisplay() => MaxValue == int.MaxValue 
-            ? $"{MinValue}+" 
+        public string GetRangeDisplay() => MaxValue == int.MaxValue
+            ? $"{MinValue}+"
             : (MinValue == MaxValue ? $"{MinValue}" : $"{MinValue}-{MaxValue}");
     }
 }

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Threading;
 using YuGiOh_Forbidden_Memories_Monitor.DataModel;
 using YuGiOh_Forbidden_Memories_Monitor.ProcessHook;
@@ -42,25 +41,25 @@ namespace YuGiOh_Forbidden_Memories_Monitor
 
         public bool TryAttachToProcess()
         {
-            var (duckstationProcess, bizhawkProcess) = GetAvailableEmulators();
+            var (duckstationId, bizhawkId, duckstationName, bizhawkName) = GetAvailableEmulators();
 
             if (!string.IsNullOrEmpty(_preferredEmulator))
             {
-if (_preferredEmulator == DuckStationDisplayName && duckstationProcess != null)
-            {
-                _currentEmulatorType = DuckStationDisplayName;
-                bool success = AttachToProcess((uint)duckstationProcess.Id, duckstationProcess.ProcessName, DuckStationDisplayName);
-                if (success)
+                if (_preferredEmulator == DuckStationDisplayName && duckstationId.HasValue)
                 {
-                    StartPolling(DefaultPollingIntervalMs);
+                    _currentEmulatorType = DuckStationDisplayName;
+                    bool success = AttachToProcess(duckstationId.Value, duckstationName!, DuckStationDisplayName);
+                    if (success)
+                    {
+                        StartPolling(DefaultPollingIntervalMs);
+                    }
+                    return success;
                 }
-                return success;
-            }
 
-            if (_preferredEmulator == BizhawkDisplayName && bizhawkProcess != null)
-            {
-                _currentEmulatorType = BizhawkDisplayName;
-                bool success = AttachToProcess((uint)bizhawkProcess.Id, bizhawkProcess.ProcessName, BizhawkDisplayName);
+                if (_preferredEmulator == BizhawkDisplayName && bizhawkId.HasValue)
+                {
+                    _currentEmulatorType = BizhawkDisplayName;
+                    bool success = AttachToProcess(bizhawkId.Value, bizhawkName!, BizhawkDisplayName);
                     if (success)
                     {
                         StartPolling(DefaultPollingIntervalMs);
@@ -74,30 +73,39 @@ if (_preferredEmulator == DuckStationDisplayName && duckstationProcess != null)
             return false;
         }
 
-        private (Process? duckstation, Process? bizhawk) GetAvailableEmulators()
+        private (uint? duckstationId, uint? bizhawkId, string? duckstationName, string? bizhawkName) GetAvailableEmulators()
         {
-            var processes = Process.GetProcesses().ToList();
-            Process? duckstationProcess = null;
-            Process? bizhawkProcess = null;
+            uint? duckstationId = null;
+            uint? bizhawkId = null;
+            string? duckstationName = null;
+            string? bizhawkName = null;
 
-            foreach (var process in processes)
+            foreach (var process in Process.GetProcesses())
             {
-                if (process.ProcessName.StartsWith(DuckStationProcessName, StringComparison.OrdinalIgnoreCase))
+                try
                 {
-                    duckstationProcess = process;
-                }
-                else if (process.ProcessName.Equals(BizhawkProcessName, StringComparison.OrdinalIgnoreCase))
-                {
-                    bizhawkProcess = process;
-                }
+                    if (process.ProcessName.StartsWith(DuckStationProcessName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        duckstationId = (uint)process.Id;
+                        duckstationName = process.ProcessName;
+                    }
+                    else if (process.ProcessName.Equals(BizhawkProcessName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        bizhawkId = (uint)process.Id;
+                        bizhawkName = process.ProcessName;
+                    }
 
-                if (duckstationProcess != null && bizhawkProcess != null)
+                    if (duckstationId.HasValue && bizhawkId.HasValue)
+                    {
+                        break;
+                    }
+                }
+                catch
                 {
-                    break;
                 }
             }
 
-            return (duckstationProcess, bizhawkProcess);
+            return (duckstationId, bizhawkId, duckstationName, bizhawkName);
         }
 
         public bool AttachToProcess(uint processId, string processName, string emulatorType)

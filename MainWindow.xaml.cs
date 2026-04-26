@@ -14,6 +14,19 @@ namespace YuGiOh_Forbidden_Memories_Monitor
         private const string AttachButtonText = "Attach";
         private const string DetachButtonText = "Detach";
 
+        private const string StatusAutoDetected = "Auto-detected YGO FM";
+        private const string StatusAttached = "Attached";
+        private const string StatusDetached = "Detached";
+        private const string StatusNotFound = "not found";
+        private const string StatusNoEmulator = "No emulator";
+
+        private const string SelectEmulatorPrompt = "Select an emulator to attach to";
+        private const string NotAttachedText = "[Not attached]";
+        private const string GameNotFoundText = "Game not found";
+        private const string DefaultScoreText = "-- = --";
+        private const string DefaultLpText = "--";
+        private const string DefaultStarchipsText = "--";
+
         private static readonly SolidColorBrush GreenButtonBrush = new((Color)ColorConverter.ConvertFromString("#4CAF50"));
         private static readonly SolidColorBrush RedButtonBrush = new((Color)ColorConverter.ConvertFromString("#F44336"));
         private static readonly SolidColorBrush DefaultCellBackground = new((Color)ColorConverter.ConvertFromString("#2a2a3a"));
@@ -24,6 +37,7 @@ namespace YuGiOh_Forbidden_Memories_Monitor
 
         private ProcessMonitor? _processMonitor;
         private System.Windows.Threading.DispatcherTimer? _uiTimer;
+        private bool _isAttached = false;
 
         public MainWindow()
         {
@@ -88,7 +102,7 @@ namespace YuGiOh_Forbidden_Memories_Monitor
 
         private void OnWindowLoaded(object sender, RoutedEventArgs e)
         {
-            StatusText.Text = "Select an emulator to attach to";
+            StatusText.Text = SelectEmulatorPrompt;
             ResetTableCells();
         }
 
@@ -103,19 +117,19 @@ namespace YuGiOh_Forbidden_Memories_Monitor
             Dispatcher.Invoke(() =>
             {
                 StatusText.Text = status;
-                if (status.Contains("Auto-detected YGO FM") || status.Contains("Attached"))
+                if (status.Contains(StatusAutoDetected) || status.Contains(StatusAttached))
                 {
                     _isAttached = true;
                     AttachDetachButton.Content = DetachButtonText;
                     AttachDetachButton.Background = RedButtonBrush;
                 }
-                else if (status.Contains("Detached"))
+                else if (status.Contains(StatusDetached))
                 {
                     _isAttached = false;
                     AttachDetachButton.Content = AttachButtonText;
                     AttachDetachButton.Background = GreenButtonBrush;
                 }
-                else if (status.Contains("not found") || status.Contains("No emulator"))
+                else if (status.Contains(StatusNotFound) || status.Contains(StatusNoEmulator))
                 {
                     _isAttached = false;
                     AttachDetachButton.Content = DetachButtonText;
@@ -248,11 +262,11 @@ namespace YuGiOh_Forbidden_Memories_Monitor
 
             if (!gameState.GameVerified)
             {
-                GameIdText.Text = "Game not found";
-                P1LifePointsText.Text = "--";
-                P2LifePointsText.Text = "--";
-                DuelScoreText.Text = "-- = --";
-                StarchipsText.Text = "--";
+                GameIdText.Text = GameNotFoundText;
+                P1LifePointsText.Text = DefaultLpText;
+                P2LifePointsText.Text = DefaultLpText;
+                DuelScoreText.Text = DefaultScoreText;
+                StarchipsText.Text = DefaultStarchipsText;
                 return;
             }
 
@@ -299,9 +313,10 @@ namespace YuGiOh_Forbidden_Memories_Monitor
             sb.AppendLine();
             
             sb.AppendLine($"=== DUEL SCORE: {gameState.TotalScore} = {gameState.ScoreRank} ===");
-            sb.AppendLine($"(Base 50 + modifiers, victory ranks shown below)");
+            sb.AppendLine($"(Base 52 + modifiers, victory ranks shown below)");
             sb.AppendLine();
             sb.AppendLine("Stats breakdown:");
+            sb.AppendLine($"  CMB: {gameState.StatComboPlays} -> {gameState.ScoreContributions[0]}");
             sb.AppendLine($"  TRN: {gameState.StatTurns} -> {gameState.ScoreContributions[1]}");
             sb.AppendLine($"  ATK: {gameState.StatEffectiveAttacks} -> {gameState.ScoreContributions[2]}");
             sb.AppendLine($"  DFW: {gameState.StatDefensiveWins} -> {gameState.ScoreContributions[3]}");
@@ -310,7 +325,6 @@ namespace YuGiOh_Forbidden_Memories_Monitor
             sb.AppendLine($"  EQP: {gameState.StatEquipMagic} -> {gameState.ScoreContributions[6]}");
             sb.AppendLine($"  MAG: {gameState.StatPureMagic} -> {gameState.ScoreContributions[7]}");
             sb.AppendLine($"  TRP: {gameState.StatTrapsTriggered} -> {gameState.ScoreContributions[8]}");
-            sb.AppendLine($"  CMB: {gameState.StatComboPlays} -> {gameState.ScoreContributions[9]}");
             sb.AppendLine($"  LP: {gameState.DuelLifePoints} -> {gameState.ScoreContributions[10]}");
             sb.AppendLine();
             sb.AppendLine("Rank scale: S POW:99-90 | A POW:89-80 | B POW:79-70 | C POW:69-60 | D POW:59-50");
@@ -318,8 +332,6 @@ namespace YuGiOh_Forbidden_Memories_Monitor
 
             DebugLogText.Text = sb.ToString();
         }
-
-        private bool _isAttached = false;
 
         private void AttachDetachButton_Click(object sender, RoutedEventArgs e)
         {
@@ -346,18 +358,18 @@ namespace YuGiOh_Forbidden_Memories_Monitor
         {
             Dispatcher.Invoke(() =>
             {
-                GameIdText.Text = "[Not attached]";
-                P1LifePointsText.Text = "--";
-                P2LifePointsText.Text = "--";
-                DuelScoreText.Text = "-- = --";
-                StarchipsText.Text = "--";
+                GameIdText.Text = NotAttachedText;
+                P1LifePointsText.Text = DefaultLpText;
+                P2LifePointsText.Text = DefaultLpText;
+                DuelScoreText.Text = DefaultScoreText;
+                StarchipsText.Text = DefaultStarchipsText;
                 ResetTableCells();
                 _isAttached = false;
                 AttachDetachButton.Content = AttachButtonText;
                 AttachDetachButton.Background = GreenButtonBrush;
                 AttachDetachButton.Visibility = Visibility.Collapsed;
                 EmulatorSelectionPanel.Visibility = Visibility.Visible;
-                StatusText.Text = "Select an emulator to attach to";
+                StatusText.Text = SelectEmulatorPrompt;
             });
         }
 

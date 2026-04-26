@@ -72,6 +72,7 @@ namespace YuGiOh_Forbidden_Memories_Monitor.DataReader
             builder.StatEquipMagic = (byte)stats[6];
             builder.StatPureMagic = (byte)stats[7];
             builder.StatTrapsTriggered = (byte)stats[8];
+            builder.StatComboPlays = (byte)stats[9];
             
             ReadResources(builder);
 
@@ -92,7 +93,8 @@ namespace YuGiOh_Forbidden_Memories_Monitor.DataReader
                 ReadByte(ResolveAddress(MemoryMap.StatFusions)),
                 ReadByte(ResolveAddress(MemoryMap.StatEquipMagic)),
                 ReadByte(ResolveAddress(MemoryMap.StatPureMagic)),
-                ReadByte(ResolveAddress(MemoryMap.StatTrapsTriggered))
+                ReadByte(ResolveAddress(MemoryMap.StatTrapsTriggered)),
+                ReadByte(ResolveAddress(MemoryMap.StatComboPlays))
             };
         }
 
@@ -104,8 +106,9 @@ namespace YuGiOh_Forbidden_Memories_Monitor.DataReader
                 builder.CardsUsed = ReadUInt16(ResolveAddress(MemoryMap.CardsUsedAddress));
                 builder.Starchips = ReadUInt16(ResolveAddress(MemoryMap.StarchipsAddress));
             }
-            catch
+            catch (Exception ex)
             {
+                ErrorLogger.LogError("ReadResources", ex);
                 builder.DuelLifePoints = 0;
                 builder.CardsUsed = 0;
                 builder.Starchips = 0;
@@ -135,8 +138,9 @@ namespace YuGiOh_Forbidden_Memories_Monitor.DataReader
             {
                 return ReadString(address, length);
             }
-            catch
+            catch (Exception ex)
             {
+                ErrorLogger.LogError("TryReadString", ex);
                 return string.Empty;
             }
         }
@@ -147,8 +151,9 @@ namespace YuGiOh_Forbidden_Memories_Monitor.DataReader
             {
                 return ReadUInt16(address);
             }
-            catch
+            catch (Exception ex)
             {
+                ErrorLogger.LogError("TryReadUInt16", ex);
                 return 0;
             }
         }

@@ -26,30 +26,38 @@ namespace YuGiOh_Forbidden_Memories_Monitor.LogicEngine
         {
             contributions = new int[11];
             
+            if (stats == null || stats.Length < 9)
+            {
+                return BaseScore;
+            }
+            
             int score = BaseScore;
             
-            contributions[1] = EvaluateStat(ScoreTierRegistry.Turns, stats[1]);
+            contributions[0] = EvaluateStat(ScoreTierRegistry.ComboPlays, stats.Length > 0 ? stats[0] : 0);
+            score += contributions[0];
+            
+            contributions[1] = EvaluateStat(ScoreTierRegistry.Turns, stats.Length > 1 ? stats[1] : 0);
             score += contributions[1];
             
-            contributions[2] = EvaluateStat(ScoreTierRegistry.EffectiveAttacks, stats[2]);
+            contributions[2] = EvaluateStat(ScoreTierRegistry.EffectiveAttacks, stats.Length > 2 ? stats[2] : 0);
             score += contributions[2];
             
-            contributions[3] = EvaluateStat(ScoreTierRegistry.DefensiveWins, stats[3]);
+            contributions[3] = EvaluateStat(ScoreTierRegistry.DefensiveWins, stats.Length > 3 ? stats[3] : 0);
             score += contributions[3];
             
-            contributions[4] = EvaluateStat(ScoreTierRegistry.FaceDowns, stats[4]);
+            contributions[4] = EvaluateStat(ScoreTierRegistry.FaceDowns, stats.Length > 4 ? stats[4] : 0);
             score += contributions[4];
             
-            contributions[5] = EvaluateStat(ScoreTierRegistry.Fusions, stats[5]);
+            contributions[5] = EvaluateStat(ScoreTierRegistry.Fusions, stats.Length > 5 ? stats[5] : 0);
             score += contributions[5];
             
-            contributions[6] = EvaluateStat(ScoreTierRegistry.EquipMagic, stats[6]);
+            contributions[6] = EvaluateStat(ScoreTierRegistry.EquipMagic, stats.Length > 6 ? stats[6] : 0);
             score += contributions[6];
             
-            contributions[7] = EvaluateStat(ScoreTierRegistry.PureMagic, stats[7]);
+            contributions[7] = EvaluateStat(ScoreTierRegistry.PureMagic, stats.Length > 7 ? stats[7] : 0);
             score += contributions[7];
             
-            contributions[8] = EvaluateStat(ScoreTierRegistry.TrapsTriggered, stats[8]);
+            contributions[8] = EvaluateStat(ScoreTierRegistry.TrapsTriggered, stats.Length > 8 ? stats[8] : 0);
             score += contributions[8];
             
             contributions[9] = EvaluateStat(ScoreTierRegistry.CardsUsed, cardsUsed);

@@ -57,12 +57,18 @@ namespace YuGiOh_Forbidden_Memories_Monitor.ProcessHook
         }
 
         public const uint MEM_COMMIT = 0x1000;
-        public const uint MEM_PRIVATE = 0x20000;
-        
+
         public const uint PAGE_READWRITE = 0x04;
-        public const uint PAGE_EXECUTE_READWRITE = 0x40;
         public const uint PAGE_READONLY = 0x02;
-        public const uint PAGE_EXECUTE_READ = 0x20;
+
+        private const string GameIdPattern = "SLUS_014.11;1";
+        private const int GameIdOffsetFromRamBase = 0x9244;
+        private const int MinRegionScanBytes = 0x10000;
+        private const long MinRegionSizeBytes = 0x100000;
+        private const long RamSizeBytes = 0x1FFFFF;
+        private const int FallbackRegionSizeBytes = 0x10000;
+        private const int MaxScanSizeBytes = 16 * 1024 * 1024;
+        private const int ProcessAccessFlagsExtra = 0x1000;
 
         private static readonly ConcurrentDictionary<string, string> _scanLogs = new();
         private static int _scanCounter;
@@ -91,40 +97,9 @@ namespace YuGiOh_Forbidden_Memories_Monitor.ProcessHook
             }
         }
 
-        public static IntPtr? FindProcessByName(string processName)
-        {
-            var processes = Process.GetProcesses();
-            foreach (var process in processes)
-            {
-                if (string.Equals(process.ProcessName, processName, StringComparison.OrdinalIgnoreCase))
-                {
-                    return new IntPtr(process.Id);
-                }
-            }
-            return null;
-        }
-
-        public static ProcessInfo? GetProcessInfo(string processName)
-        {
-            var processes = Process.GetProcesses();
-            foreach (var process in processes)
-            {
-                if (string.Equals(process.ProcessName, processName, StringComparison.OrdinalIgnoreCase))
-                {
-                    return new ProcessInfo
-                    {
-                        ProcessId = (uint)process.Id,
-                        ProcessName = process.ProcessName,
-                        MainWindowTitle = process.MainWindowTitle
-                    };
-                }
-            }
-            return null;
-        }
-
         public static IntPtr? OpenProcessHandle(uint processId)
         {
-            var handle = OpenProcess(PROCESS_VM_READ | PROCESS_QUERY_INFORMATION | 0x1000, false, processId);
+            var handle = OpenProcess(PROCESS_VM_READ | PROCESS_QUERY_INFORMATION | ProcessAccessFlagsExtra, false, processId);
             if (handle == IntPtr.Zero)
             {
                 return null;
@@ -179,7 +154,7 @@ namespace YuGiOh_Forbidden_Memories_Monitor.ProcessHook
             if (ramBase.HasValue)
             {
                 log.AppendLine($"[SUCCESS] PS1 RAM Found via Game ID: 0x{ramBase.Value:X16}");
-                log.AppendLine($"[INFO] RAM End: 0x{ramBase.Value + 0x1FFFFF:X16}");
+                log.AppendLine($"[INFO] RAM End: 0x{ramBase.Value + RamSizeBytes:X16}");
                 gameVerified = true;
                 SetLastMemoryScanLog(log.ToString());
                 DebugLog($"[DuckStation] SUCCESS via Game ID: 0x{ramBase.Value:X16}");
@@ -194,12 +169,10 @@ namespace YuGiOh_Forbidden_Memories_Monitor.ProcessHook
 
         private static ulong? FindPS1RAMViaGameIDSearch(IntPtr processHandle, StringBuilder log)
         {
-            log.AppendLine("--- Game ID Search ---");
-            log.AppendLine("[SEARCH] Searching for: \"SLUS_014.11;1\"");
+            log.AppendLine($"--- Game ID Search ---");
+            log.AppendLine($"[SEARCH] Searching for: \"{GameIdPattern}\"");
 
-            byte[] gameIdPattern1 = System.Text.Encoding.ASCII.GetBytes("SLUS_014.11;1");
-            byte[] gameIdPattern2 = System.Text.Encoding.ASCII.GetBytes("AAAAAA");
-            byte[] gameIdPattern3 = System.Text.Encoding.ASCII.GetBytes("BBBBBB");
+            byte[] gameIdPatternBytes = Encoding.ASCII.GetBytes(GameIdPattern);
 
             IntPtr address = IntPtr.Zero;
             int regionsScanned = 0;
@@ -217,22 +190,22 @@ namespace YuGiOh_Forbidden_Memories_Monitor.ProcessHook
                 regionsScanned++;
                 long regionSize = mbi.RegionSize.ToInt64();
 
-                bool isReadable = (mbi.Protect == PAGE_READWRITE || 
+                bool isReadable = (mbi.Protect == PAGE_READWRITE ||
                                    mbi.Protect == PAGE_READONLY);
 
-                if (mbi.State == MEM_COMMIT && isReadable && regionSize >= 0x100000)
+                if (mbi.State == MEM_COMMIT && isReadable && regionSize >= MinRegionSizeBytes)
                 {
-                    long scanSize = Math.Min(regionSize, 16 * 1024 * 1024);
+                    long scanSize = Math.Min(regionSize, MaxScanSizeBytes);
                     byte[] regionBuffer = new byte[scanSize];
 
-                    if (ReadMemory(processHandle, mbi.BaseAddress, regionBuffer, (int)scanSize, out int bytesRead) && bytesRead > 0x10000)
+                    if (ReadMemory(processHandle, mbi.BaseAddress, regionBuffer, (int)scanSize, out int bytesRead) && bytesRead > MinRegionScanBytes)
                     {
-                        for (int i = 0; i <= bytesRead - gameIdPattern1.Length; i++)
+                        for (int i = 0; i <= bytesRead - gameIdPatternBytes.Length; i++)
                         {
                             bool match = true;
-                            for (int j = 0; j < gameIdPattern1.Length; j++)
+                            for (int j = 0; j < gameIdPatternBytes.Length; j++)
                             {
-                                if (regionBuffer[i + j] != gameIdPattern1[j])
+                                if (regionBuffer[i + j] != gameIdPatternBytes[j])
                                 {
                                     match = false;
                                     break;
@@ -240,18 +213,18 @@ namespace YuGiOh_Forbidden_Memories_Monitor.ProcessHook
                             }
                             if (match)
                             {
-                                ulong ramBase = (ulong)mbi.BaseAddress + (ulong)i - 0x9244;
+                                ulong ramBase = (ulong)mbi.BaseAddress + (ulong)i - GameIdOffsetFromRamBase;
                                 idMatches++;
-                                
-                                log.AppendLine($"[MATCH] Game ID \"SLUS_014.11;1\" found at region 0x{mbi.BaseAddress:X16}");
+
+                                log.AppendLine($"[MATCH] Game ID \"{GameIdPattern}\" found at region 0x{mbi.BaseAddress:X16}");
                                 log.AppendLine($"  Offset in region: 0x{i:X}");
                                 log.AppendLine($"  Calculated RAM base: 0x{ramBase:X16}");
 
                                 byte[] verifyBuffer = new byte[16];
-                                if (ReadMemory(processHandle, new IntPtr((long)ramBase + 0x9244), verifyBuffer, 16, out int verifyBytes) && verifyBytes == 16)
+                                if (ReadMemory(processHandle, new IntPtr((long)ramBase + GameIdOffsetFromRamBase), verifyBuffer, 16, out int verifyBytes) && verifyBytes == 16)
                                 {
-                                    string verifyHeader = System.Text.Encoding.ASCII.GetString(verifyBuffer).TrimEnd('\0');
-                                    log.AppendLine($"  Verified at RAM+0x9244: {verifyHeader}");
+                                    string verifyHeader = Encoding.ASCII.GetString(verifyBuffer).TrimEnd('\0');
+                                    log.AppendLine($"  Verified at RAM+0x{GameIdOffsetFromRamBase:X}: {verifyHeader}");
                                 }
 
                                 DebugLog($"[DuckStation] Game ID found, RAM base: 0x{ramBase:X16}");
@@ -266,7 +239,7 @@ namespace YuGiOh_Forbidden_Memories_Monitor.ProcessHook
                 }
 
                 if (regionSize <= 0)
-                    regionSize = 0x10000;
+                    regionSize = FallbackRegionSizeBytes;
 
                 address = (IntPtr)((long)mbi.BaseAddress + regionSize);
 
@@ -285,19 +258,5 @@ namespace YuGiOh_Forbidden_Memories_Monitor.ProcessHook
             DebugLog($"[DuckStation] Game ID search: {idMatches} matches");
             return null;
         }
-    }
-
-    public sealed class ProcessInfo
-    {
-        public uint ProcessId { get; set; }
-        public string ProcessName { get; set; } = string.Empty;
-        public string MainWindowTitle { get; set; } = string.Empty;
-    }
-
-    public sealed class MemoryRegion
-    {
-        public ulong BaseAddress { get; set; }
-        public ulong Size { get; set; }
-        public uint Protect { get; set; }
     }
 }
