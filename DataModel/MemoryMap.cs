@@ -8,7 +8,6 @@ namespace YuGiOh_Forbidden_Memories_Monitor.DataModel
         public const uint GameIdAddress = 0x80009244;
 
         // Display resources
-        public const uint P1LifePointsAddress = 0x800EA004;
         public const uint P2LifePointsAddress = 0x800EA024;
         public const uint DuelLifePointsAddress = 0x800EA004;
         public const uint CardsUsedAddress = 0x800EA008;

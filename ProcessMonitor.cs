@@ -13,7 +13,9 @@ namespace YuGiOh_Forbidden_Memories_Monitor
     {
         private const string DuckStationProcessName = "duckstation";
         private const string BizhawkProcessName = "EmuHawk";
-        private const uint DefaultRAMBase = 0x80000000;
+        private const string DuckStationDisplayName = "DuckStation";
+        private const string BizhawkDisplayName = "Bizhawk";
+        private const int DefaultPollingIntervalMs = 16;
 
         private string _preferredEmulator = string.Empty;
         private string _currentEmulatorType = string.Empty;
@@ -31,9 +33,7 @@ namespace YuGiOh_Forbidden_Memories_Monitor
         public DataReaderLibrary.DataReader? Reader => _dataReader;
         public GameState? CurrentGameState { get; private set; }
 
-        public event EventHandler<GameState>? GameStateUpdated;
         public event EventHandler<string>? StatusChanged;
-        public event EventHandler<string>? ProcessNameChanged;
 
         public void SetPreferredEmulator(string emulatorType)
         {
@@ -46,24 +46,24 @@ namespace YuGiOh_Forbidden_Memories_Monitor
 
             if (!string.IsNullOrEmpty(_preferredEmulator))
             {
-                if (_preferredEmulator == "DuckStation" && duckstationProcess != null)
+if (_preferredEmulator == DuckStationDisplayName && duckstationProcess != null)
+            {
+                _currentEmulatorType = DuckStationDisplayName;
+                bool success = AttachToProcess((uint)duckstationProcess.Id, duckstationProcess.ProcessName, DuckStationDisplayName);
+                if (success)
                 {
-                    _currentEmulatorType = "DuckStation";
-                    bool success = AttachToProcess((uint)duckstationProcess.Id, duckstationProcess.ProcessName, "DuckStation");
-                    if (success)
-                    {
-                        StartPolling(16);
-                    }
-                    return success;
+                    StartPolling(DefaultPollingIntervalMs);
                 }
+                return success;
+            }
 
-                if (_preferredEmulator == "Bizhawk" && bizhawkProcess != null)
-                {
-                    _currentEmulatorType = "Bizhawk";
-                    bool success = AttachToProcess((uint)bizhawkProcess.Id, bizhawkProcess.ProcessName, "Bizhawk");
+            if (_preferredEmulator == BizhawkDisplayName && bizhawkProcess != null)
+            {
+                _currentEmulatorType = BizhawkDisplayName;
+                bool success = AttachToProcess((uint)bizhawkProcess.Id, bizhawkProcess.ProcessName, BizhawkDisplayName);
                     if (success)
                     {
-                        StartPolling(16);
+                        StartPolling(DefaultPollingIntervalMs);
                     }
                     return success;
                 }
@@ -100,56 +100,6 @@ namespace YuGiOh_Forbidden_Memories_Monitor
             return (duckstationProcess, bizhawkProcess);
         }
 
-        public string GetCurrentEmulatorType() => _currentEmulatorType;
-
-        public (bool duckstationAvailable, bool bizhawkAvailable) GetAvailableEmulatorsStatus()
-        {
-            var (duckstation, bizhawk) = GetAvailableEmulators();
-            return (duckstation != null, bizhawk != null);
-        }
-
-        public bool TrySwitchToOtherEmulator()
-        {
-            if (!_isAttached)
-            {
-                return TryAttachToProcess();
-            }
-
-            var (duckstation, bizhawk) = GetAvailableEmulators();
-
-            if (_currentEmulatorType == "DuckStation" && bizhawk != null)
-            {
-                DetachNoStatus();
-                return AttachToProcess((uint)bizhawk.Id, bizhawk.ProcessName, "Bizhawk");
-            }
-
-            if (_currentEmulatorType == "Bizhawk" && duckstation != null)
-            {
-                DetachNoStatus();
-                return AttachToProcess((uint)duckstation.Id, duckstation.ProcessName, "DuckStation");
-            }
-
-            Detach();
-            return false;
-        }
-
-        private void DetachNoStatus()
-        {
-            StopPolling();
-
-            if (_processHandle != IntPtr.Zero)
-            {
-                ProcessHook.ProcessHook.CloseProcessHandle(_processHandle);
-                _processHandle = IntPtr.Zero;
-            }
-
-            _dataReader = null;
-            _isAttached = false;
-            CurrentGameState = null;
-            _currentProcessName = string.Empty;
-            _currentEmulatorType = string.Empty;
-        }
-
         public bool AttachToProcess(uint processId, string processName, string emulatorType)
         {
             var handle = ProcessHook.ProcessHook.OpenProcessHandle(processId);
@@ -180,26 +130,7 @@ namespace YuGiOh_Forbidden_Memories_Monitor
             _currentProcessName = processName;
             _currentEmulatorType = emulatorType;
 
-            ProcessNameChanged?.Invoke(this, $"{emulatorType}: {processName}");
             return true;
-        }
-
-        public bool AttachToProcess(uint processId, string processName)
-        {
-            return AttachToProcess(processId, processName, "Unknown");
-        }
-
-        public void DiscoverMemoryAddresses()
-        {
-            if (!_isAttached || _processHandle == IntPtr.Zero)
-            {
-                return;
-            }
-
-            // Note: The actual addresses will be discovered at runtime
-            // For now, we'll use the DataReader's read methods which use the MemoryMap addresses
-            // Users can use the Memory Search tab to find dynamic addresses
-            StatusChanged?.Invoke(this, "Memory addresses ready. Use Memory Search tab to find dynamic values.");
         }
 
         public void StartPolling(int intervalMs = 16)
@@ -225,30 +156,10 @@ namespace YuGiOh_Forbidden_Memories_Monitor
             try
             {
                 CurrentGameState = _dataReader.ReadGameState();
-                GameStateUpdated?.Invoke(this, CurrentGameState);
             }
             catch (Exception ex)
             {
                 ErrorLogger.LogError("ProcessMonitor.PollGameState", ex);
-            }
-        }
-
-        public GameState? ReadCurrentState()
-        {
-            if (!_isAttached || _dataReader == null)
-            {
-                return null;
-            }
-
-            try
-            {
-                CurrentGameState = _dataReader.ReadGameState();
-                return CurrentGameState;
-            }
-            catch (Exception ex)
-            {
-                ErrorLogger.LogError("ProcessMonitor.ReadCurrentState", ex);
-                return null;
             }
         }
 
@@ -284,22 +195,6 @@ namespace YuGiOh_Forbidden_Memories_Monitor
             Detach();
             _disposed = true;
             GC.SuppressFinalize(this);
-        }
-
-        public void UpdateP1LifePointsAddress(uint address)
-        {
-            if (_dataReader != null)
-            {
-                _dataReader.SetP1LifePointsAddress(address);
-            }
-        }
-
-        public void UpdateP2LifePointsAddress(uint address)
-        {
-            if (_dataReader != null)
-            {
-                _dataReader.SetP2LifePointsAddress(address);
-            }
         }
 
         ~ProcessMonitor()

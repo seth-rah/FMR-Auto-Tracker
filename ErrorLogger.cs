@@ -10,15 +10,5 @@ namespace YuGiOh_Forbidden_Memories_Monitor
             var message = $"[{DateTime.Now}] Operation: {operation}\nException: {exception.GetType().Name}\nMessage: {exception.Message}";
             Debug.WriteLine($"[ERROR] {message}");
         }
-
-        public static void LogInfo(string message)
-        {
-            Debug.WriteLine($"[INFO] {message}");
-        }
-
-        public static void LogWarning(string message)
-        {
-            Debug.WriteLine($"[WARN] {message}");
-        }
     }
 }

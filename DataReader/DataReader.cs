@@ -10,7 +10,6 @@ namespace YuGiOh_Forbidden_Memories_Monitor.DataReader
         private readonly IntPtr _processHandle;
         private readonly ulong _ramBaseAddress;
         private long _baseOffset;
-        private uint _p1LifePointsAddress;
         private uint _p2LifePointsAddress;
         private uint _processId;
         private string _processName = string.Empty;
@@ -30,7 +29,6 @@ namespace YuGiOh_Forbidden_Memories_Monitor.DataReader
             _ramBaseAddress = ramBaseAddress;
             _scoreCalculator = scoreCalculator ?? throw new ArgumentNullException(nameof(scoreCalculator));
             _baseOffset = (long)(ramBaseAddress - MemoryMap.KSEG0_BASE);
-            _p1LifePointsAddress = MemoryMap.P1LifePointsAddress;
             _p2LifePointsAddress = MemoryMap.P2LifePointsAddress;
         }
 
@@ -40,16 +38,6 @@ namespace YuGiOh_Forbidden_Memories_Monitor.DataReader
             _processName = processName;
             _gameVerified = gameVerified;
             _memoryScanLog = memoryScanLog;
-        }
-
-        public void SetP1LifePointsAddress(uint address)
-        {
-            _p1LifePointsAddress = address;
-        }
-
-        public void SetP2LifePointsAddress(uint address)
-        {
-            _p2LifePointsAddress = address;
         }
 
         private IntPtr ResolveAddress(uint absoluteAddress)
@@ -70,7 +58,7 @@ namespace YuGiOh_Forbidden_Memories_Monitor.DataReader
                 GameIdText = TryReadString(ResolveAddress(MemoryMap.GameIdAddress), 13)
             };
 
-            builder.P1LifePoints = TryReadUInt16(ResolveAddress(_p1LifePointsAddress));
+            builder.P1LifePoints = TryReadUInt16(ResolveAddress(MemoryMap.DuelLifePointsAddress));
             builder.P2LifePoints = TryReadUInt16(ResolveAddress(_p2LifePointsAddress));
 
             int[] stats = ReadStatValues();

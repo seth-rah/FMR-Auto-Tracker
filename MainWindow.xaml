@@ -5,7 +5,6 @@
         Height="875" Width="550"
         MinHeight="875" MinWidth="550"
         Background="#1E1E2E"
-        SizeToContent="WidthAndHeight"
         ResizeMode="CanResize">
     <Grid Margin="15">
         <Grid.ColumnDefinitions>

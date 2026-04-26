@@ -10,6 +10,18 @@ namespace YuGiOh_Forbidden_Memories_Monitor
 {
     public partial class MainWindow : Window
     {
+        private const int DefaultUiUpdateIntervalMs = 16;
+        private const string AttachButtonText = "Attach";
+        private const string DetachButtonText = "Detach";
+
+        private static readonly SolidColorBrush GreenButtonBrush = new((Color)ColorConverter.ConvertFromString("#4CAF50"));
+        private static readonly SolidColorBrush RedButtonBrush = new((Color)ColorConverter.ConvertFromString("#F44336"));
+        private static readonly SolidColorBrush DefaultCellBackground = new((Color)ColorConverter.ConvertFromString("#2a2a3a"));
+        private static readonly SolidColorBrush ActiveCellBackground = new((Color)ColorConverter.ConvertFromString("#4a4a5a"));
+        private static readonly SolidColorBrush DefaultForeground = new((Color)ColorConverter.ConvertFromString("#666666"));
+        private static readonly SolidColorBrush ScorePositiveForeground = new((Color)ColorConverter.ConvertFromString("#00FF00"));
+        private static readonly SolidColorBrush ScoreNegativeForeground = new((Color)ColorConverter.ConvertFromString("#FF6666"));
+
         private ProcessMonitor? _processMonitor;
         private System.Windows.Threading.DispatcherTimer? _uiTimer;
 
@@ -23,13 +35,11 @@ namespace YuGiOh_Forbidden_Memories_Monitor
             }
 
             _processMonitor = new ProcessMonitor();
-            _processMonitor.GameStateUpdated += OnGameStateUpdated;
             _processMonitor.StatusChanged += OnStatusChanged;
-            _processMonitor.ProcessNameChanged += OnProcessNameChanged;
 
             _uiTimer = new System.Windows.Threading.DispatcherTimer
             {
-                Interval = TimeSpan.FromMilliseconds(16)
+                Interval = TimeSpan.FromMilliseconds(DefaultUiUpdateIntervalMs)
             };
             _uiTimer.Tick += (s, e) => UpdateUI();
 
@@ -40,15 +50,12 @@ namespace YuGiOh_Forbidden_Memories_Monitor
             AttachDetachButton.Visibility = Visibility.Collapsed;
         }
 
-        private string _selectedEmulator = string.Empty;
-
         private void SelectDuckStation_Click(object sender, RoutedEventArgs e)
         {
-            _selectedEmulator = "DuckStation";
             EmulatorSelectionPanel.Visibility = Visibility.Collapsed;
             AttachDetachButton.Visibility = Visibility.Visible;
-            AttachDetachButton.Content = "Attach";
-            AttachDetachButton.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4CAF50"));
+            AttachDetachButton.Content = AttachButtonText;
+            AttachDetachButton.Background = GreenButtonBrush;
 
             _processMonitor?.SetPreferredEmulator("DuckStation");
             _processMonitor?.TryAttachToProcess();
@@ -56,18 +63,17 @@ namespace YuGiOh_Forbidden_Memories_Monitor
             _isAttached = _processMonitor?.IsAttached ?? false;
             if (_isAttached)
             {
-                AttachDetachButton.Content = "Detach";
-                AttachDetachButton.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F44336"));
+                AttachDetachButton.Content = DetachButtonText;
+                AttachDetachButton.Background = RedButtonBrush;
             }
         }
 
         private void SelectBizhawk_Click(object sender, RoutedEventArgs e)
         {
-            _selectedEmulator = "Bizhawk";
             EmulatorSelectionPanel.Visibility = Visibility.Collapsed;
             AttachDetachButton.Visibility = Visibility.Visible;
-            AttachDetachButton.Content = "Attach";
-            AttachDetachButton.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4CAF50"));
+            AttachDetachButton.Content = AttachButtonText;
+            AttachDetachButton.Background = GreenButtonBrush;
 
             _processMonitor?.SetPreferredEmulator("Bizhawk");
             _processMonitor?.TryAttachToProcess();
@@ -75,24 +81,21 @@ namespace YuGiOh_Forbidden_Memories_Monitor
             _isAttached = _processMonitor?.IsAttached ?? false;
             if (_isAttached)
             {
-                AttachDetachButton.Content = "Detach";
-                AttachDetachButton.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F44336"));
+                AttachDetachButton.Content = DetachButtonText;
+                AttachDetachButton.Background = RedButtonBrush;
             }
         }
 
         private void OnWindowLoaded(object sender, RoutedEventArgs e)
         {
             StatusText.Text = "Select an emulator to attach to";
+            ResetTableCells();
         }
 
         private void OnWindowClosed(object? sender, EventArgs e)
         {
             _uiTimer?.Stop();
             _processMonitor?.Dispose();
-        }
-
-        private void OnGameStateUpdated(object? sender, GameState gameState)
-        {
         }
 
         private void OnStatusChanged(object? sender, string status)
@@ -103,26 +106,22 @@ namespace YuGiOh_Forbidden_Memories_Monitor
                 if (status.Contains("Auto-detected YGO FM") || status.Contains("Attached"))
                 {
                     _isAttached = true;
-                    AttachDetachButton.Content = "Detach";
-                    AttachDetachButton.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F44336"));
+                    AttachDetachButton.Content = DetachButtonText;
+                    AttachDetachButton.Background = RedButtonBrush;
                 }
                 else if (status.Contains("Detached"))
                 {
                     _isAttached = false;
-                    AttachDetachButton.Content = "Attach";
-                    AttachDetachButton.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4CAF50"));
+                    AttachDetachButton.Content = AttachButtonText;
+                    AttachDetachButton.Background = GreenButtonBrush;
                 }
                 else if (status.Contains("not found") || status.Contains("No emulator"))
                 {
                     _isAttached = false;
-                    AttachDetachButton.Content = "Detach";
-                    AttachDetachButton.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F44336"));
+                    AttachDetachButton.Content = DetachButtonText;
+                    AttachDetachButton.Background = RedButtonBrush;
                 }
             });
-        }
-
-        private void OnProcessNameChanged(object? sender, string processName)
-        {
         }
 
         private void UpdateRankVisual(GameState gameState)
@@ -216,25 +215,25 @@ namespace YuGiOh_Forbidden_Memories_Monitor
                 
                 if (isActive)
                 {
-                    cell.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4a4a5a"));
+                    cell.Background = ActiveCellBackground;
                     rangeText.Text = value.ToString();
                     rangeText.Foreground = new SolidColorBrush(Colors.White);
                     rangeText.FontWeight = FontWeights.Bold;
                     scoreText.Text = FormatScore(tier.Score);
-                    scoreText.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#00FF00"));
+                    scoreText.Foreground = ScorePositiveForeground;
                     scoreText.FontWeight = FontWeights.Bold;
                 }
                 else
                 {
                     rangeText.Text = tier.GetRangeDisplay();
-                    rangeText.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#666666"));
+                    rangeText.Foreground = DefaultForeground;
                     rangeText.FontWeight = FontWeights.Normal;
                     scoreText.Text = FormatScore(tier.Score);
                     scoreText.Foreground = tier.Score >= 0 
-                        ? new SolidColorBrush((Color)ColorConverter.ConvertFromString("#00FF00")) 
-                        : new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF6666"));
+                        ? ScorePositiveForeground 
+                        : ScoreNegativeForeground;
                     scoreText.FontWeight = FontWeights.Normal;
-                    cell.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2a2a3a"));
+                    cell.Background = DefaultCellBackground;
                 }
             }
         }
@@ -247,7 +246,17 @@ namespace YuGiOh_Forbidden_Memories_Monitor
                 return;
             }
 
-            GameIdText.Text = gameState.IsProcessAttached ? gameState.GameIdText : "[Not attached]";
+            if (!gameState.GameVerified)
+            {
+                GameIdText.Text = "Game not found";
+                P1LifePointsText.Text = "--";
+                P2LifePointsText.Text = "--";
+                DuelScoreText.Text = "-- = --";
+                StarchipsText.Text = "--";
+                return;
+            }
+
+            GameIdText.Text = gameState.GameIdText;
             P1LifePointsText.Text = gameState.P1LifePoints.ToString();
             P2LifePointsText.Text = gameState.P2LifePoints.ToString();
             
@@ -314,7 +323,7 @@ namespace YuGiOh_Forbidden_Memories_Monitor
 
         private void AttachDetachButton_Click(object sender, RoutedEventArgs e)
         {
-            if (AttachDetachButton.Content.ToString() == "Detach")
+            if (AttachDetachButton.Content.ToString() == DetachButtonText)
             {
                 _processMonitor?.Detach();
                 ClearUI();
@@ -327,8 +336,8 @@ namespace YuGiOh_Forbidden_Memories_Monitor
                 _isAttached = _processMonitor?.IsAttached ?? false;
                 if (_isAttached)
                 {
-                    AttachDetachButton.Content = "Detach";
-                    AttachDetachButton.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F44336"));
+                    AttachDetachButton.Content = DetachButtonText;
+                    AttachDetachButton.Background = RedButtonBrush;
                 }
             }
         }
@@ -344,9 +353,8 @@ namespace YuGiOh_Forbidden_Memories_Monitor
                 StarchipsText.Text = "--";
                 ResetTableCells();
                 _isAttached = false;
-                _selectedEmulator = string.Empty;
-                AttachDetachButton.Content = "Attach";
-                AttachDetachButton.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4CAF50"));
+                AttachDetachButton.Content = AttachButtonText;
+                AttachDetachButton.Background = GreenButtonBrush;
                 AttachDetachButton.Visibility = Visibility.Collapsed;
                 EmulatorSelectionPanel.Visibility = Visibility.Visible;
                 StatusText.Text = "Select an emulator to attach to";
@@ -355,8 +363,8 @@ namespace YuGiOh_Forbidden_Memories_Monitor
 
         private void ResetTableCells()
         {
-            var defaultBg = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2a2a3a"));
-            var defaultFg = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#666666"));
+            var defaultBg = DefaultCellBackground;
+            var defaultFg = DefaultForeground;
 
             void ResetCell(Border cell, TextBlock range, TextBlock score, string rangeText, string scoreText)
             {

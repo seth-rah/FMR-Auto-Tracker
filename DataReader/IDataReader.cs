@@ -9,9 +9,5 @@ namespace YuGiOh_Forbidden_Memories_Monitor.DataReader
         GameState ReadGameState();
         
         void SetProcessInfo(uint processId, string processName, bool gameVerified, string memoryScanLog);
-        
-        void SetP1LifePointsAddress(uint address);
-        
-        void SetP2LifePointsAddress(uint address);
     }
 }

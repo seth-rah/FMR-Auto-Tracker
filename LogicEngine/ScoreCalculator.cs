@@ -73,25 +73,6 @@ namespace YuGiOh_Forbidden_Memories_Monitor.LogicEngine
             return "S TEC";
         }
 
-        public ScoreRankInfo GetRankInfo(int score)
-        {
-            foreach (var threshold in _rankThresholds)
-            {
-                if (score >= threshold.LowerBound && score <= threshold.UpperBound)
-                {
-                    return new ScoreRankInfo
-                    {
-                        Rank = threshold.Letter,
-                        Category = threshold.Category,
-                        ScoreValue = score,
-                        LowerBound = threshold.LowerBound,
-                        UpperBound = threshold.UpperBound
-                    };
-                }
-            }
-            return new ScoreRankInfo { Rank = "S", Category = "TEC", ScoreValue = score, LowerBound = 0, UpperBound = 9 };
-        }
-
         private static int EvaluateStat(IReadOnlyList<ScoreTier> tiers, int value)
         {
             return ScoreTierRegistry.Evaluate(tiers, value);
