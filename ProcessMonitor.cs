@@ -69,7 +69,7 @@ namespace YuGiOh_Forbidden_Memories_Monitor
             }
 
             string emulatorName = !string.IsNullOrEmpty(_preferredEmulator) ? _preferredEmulator : "Selected emulator";
-            StatusChanged?.Invoke(this, $"{emulatorName} not found. Waiting...");
+            StatusChanged?.Invoke(this, $"{emulatorName} not found. Please detach");
             return false;
         }
 
@@ -130,11 +130,11 @@ namespace YuGiOh_Forbidden_Memories_Monitor
             
             if (gameVerified)
             {
-                StatusChanged?.Invoke(this, $"Auto-detected YGO FM! RAM: 0x{_ramBaseAddress:X16}");
+                StatusChanged?.Invoke(this, $"RAM: 0x{_ramBaseAddress:X16}");
             }
             else
             {
-                StatusChanged?.Invoke(this, $"Attached: {processName} | RAM: 0x{_ramBaseAddress:X16}");
+                StatusChanged?.Invoke(this, $"RAM: 0x{_ramBaseAddress:X16}");
             }
             
             _dataReader = new DataReaderLibrary.DataReader(_processHandle, _ramBaseAddress);
