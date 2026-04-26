@@ -316,8 +316,7 @@ namespace YuGiOh_Forbidden_Memories_Monitor
             sb.AppendLine($"(Base 52 + modifiers, victory ranks shown below)");
             sb.AppendLine();
             sb.AppendLine("Stats breakdown:");
-            sb.AppendLine($"  CMB: {gameState.StatComboPlays} -> {gameState.ScoreContributions[0]}");
-            sb.AppendLine($"  TRN: {gameState.StatTurns} -> {gameState.ScoreContributions[1]}");
+            sb.AppendLine($"  TRN: {gameState.StatTurns} -> {gameState.ScoreContributions[0]}");
             sb.AppendLine($"  ATK: {gameState.StatEffectiveAttacks} -> {gameState.ScoreContributions[2]}");
             sb.AppendLine($"  DFW: {gameState.StatDefensiveWins} -> {gameState.ScoreContributions[3]}");
             sb.AppendLine($"  FCD: {gameState.StatFaceDowns} -> {gameState.ScoreContributions[4]}");
@@ -325,7 +324,8 @@ namespace YuGiOh_Forbidden_Memories_Monitor
             sb.AppendLine($"  EQP: {gameState.StatEquipMagic} -> {gameState.ScoreContributions[6]}");
             sb.AppendLine($"  MAG: {gameState.StatPureMagic} -> {gameState.ScoreContributions[7]}");
             sb.AppendLine($"  TRP: {gameState.StatTrapsTriggered} -> {gameState.ScoreContributions[8]}");
-            sb.AppendLine($"  LP: {gameState.DuelLifePoints} -> {gameState.ScoreContributions[10]}");
+            sb.AppendLine($"  CRD: {gameState.CardsUsed} -> {gameState.ScoreContributions[8]}");
+            sb.AppendLine($"  LP: {gameState.DuelLifePoints} -> {gameState.ScoreContributions[9]}");
             sb.AppendLine();
             sb.AppendLine("Rank scale: S POW:99-90 | A POW:89-80 | B POW:79-70 | C POW:69-60 | D POW:59-50");
             sb.AppendLine("            D TEC:49-40 | C TEC:39-30 | B TEC:29-20 | A TEC:19-10 | S TEC:09-00");

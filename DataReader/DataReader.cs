@@ -12,7 +12,6 @@ namespace YuGiOh_Forbidden_Memories_Monitor.DataReader
         private long _baseOffset;
         private uint _p2LifePointsAddress;
         private uint _processId;
-        private string _processName = string.Empty;
         private bool _gameVerified;
         private string _memoryScanLog = string.Empty;
         
@@ -35,7 +34,6 @@ namespace YuGiOh_Forbidden_Memories_Monitor.DataReader
         public void SetProcessInfo(uint processId, string processName, bool gameVerified, string memoryScanLog)
         {
             _processId = processId;
-            _processName = processName;
             _gameVerified = gameVerified;
             _memoryScanLog = memoryScanLog;
         }
@@ -52,14 +50,15 @@ namespace YuGiOh_Forbidden_Memories_Monitor.DataReader
                 IsProcessAttached = _processHandle != IntPtr.Zero,
                 RamBaseAddress = (uint)_ramBaseAddress,
                 ProcessId = _processId,
-                ProcessName = _processName,
                 GameVerified = _gameVerified,
                 MemoryScanLog = _memoryScanLog,
                 GameIdText = TryReadString(ResolveAddress(MemoryMap.GameIdAddress), 13)
             };
 
-            builder.P1LifePoints = TryReadUInt16(ResolveAddress(MemoryMap.DuelLifePointsAddress));
             builder.P2LifePoints = TryReadUInt16(ResolveAddress(_p2LifePointsAddress));
+
+            ushort p1LifePoints = TryReadUInt16(ResolveAddress(MemoryMap.DuelLifePointsAddress));
+            builder.P1LifePoints = p1LifePoints;
 
             int[] stats = ReadStatValues();
             builder.StatValues = stats;
@@ -72,9 +71,8 @@ namespace YuGiOh_Forbidden_Memories_Monitor.DataReader
             builder.StatEquipMagic = (byte)stats[6];
             builder.StatPureMagic = (byte)stats[7];
             builder.StatTrapsTriggered = (byte)stats[8];
-            builder.StatComboPlays = (byte)stats[9];
             
-            ReadResources(builder);
+            ReadResources(builder, p1LifePoints);
 
             CalculateScore(builder, stats);
 
@@ -93,16 +91,15 @@ namespace YuGiOh_Forbidden_Memories_Monitor.DataReader
                 ReadByte(ResolveAddress(MemoryMap.StatFusions)),
                 ReadByte(ResolveAddress(MemoryMap.StatEquipMagic)),
                 ReadByte(ResolveAddress(MemoryMap.StatPureMagic)),
-                ReadByte(ResolveAddress(MemoryMap.StatTrapsTriggered)),
-                ReadByte(ResolveAddress(MemoryMap.StatComboPlays))
+                ReadByte(ResolveAddress(MemoryMap.StatTrapsTriggered))
             };
         }
 
-        private void ReadResources(GameState.Builder builder)
+        private void ReadResources(GameState.Builder builder, ushort p1LifePoints)
         {
             try
             {
-                builder.DuelLifePoints = ReadUInt16(ResolveAddress(MemoryMap.DuelLifePointsAddress));
+                builder.DuelLifePoints = p1LifePoints;
                 builder.CardsUsed = ReadUInt16(ResolveAddress(MemoryMap.CardsUsedAddress));
                 builder.Starchips = ReadUInt16(ResolveAddress(MemoryMap.StarchipsAddress));
             }
@@ -173,11 +170,6 @@ namespace YuGiOh_Forbidden_Memories_Monitor.DataReader
         private byte ReadByte(IntPtr address)
         {
             return ProcessHook.ProcessHook.ReadByte(_processHandle, address);
-        }
-
-        public void Dispose()
-        {
-            GC.SuppressFinalize(this);
         }
     }
 }

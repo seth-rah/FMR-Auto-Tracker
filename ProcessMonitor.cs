@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Threading;
 using YuGiOh_Forbidden_Memories_Monitor.DataModel;
@@ -100,8 +100,13 @@ namespace YuGiOh_Forbidden_Memories_Monitor
                         break;
                     }
                 }
-                catch
+                catch (InvalidOperationException ex)
                 {
+                    Debug.WriteLine($"[ProcessMonitor] Process no longer running during enumeration: {ex.Message}");
+                }
+                catch (System.ComponentModel.Win32Exception ex)
+                {
+                    Debug.WriteLine($"[ProcessMonitor] Access denied for process enumeration: {ex.Message}");
                 }
             }
 

@@ -28,7 +28,6 @@ namespace YuGiOh_Forbidden_Memories_Monitor.DataModel
         public byte StatFaceDowns { get; }
         public byte StatPureMagic { get; }
         public byte StatTrapsTriggered { get; }
-        public byte StatComboPlays { get; }
         public byte StatFusions { get; }
         public byte StatEquipMagic { get; }
         public byte StatChangeField { get; }
@@ -61,7 +60,6 @@ namespace YuGiOh_Forbidden_Memories_Monitor.DataModel
             StatFaceDowns = builder.StatFaceDowns;
             StatPureMagic = builder.StatPureMagic;
             StatTrapsTriggered = builder.StatTrapsTriggered;
-            StatComboPlays = builder.StatComboPlays;
             StatFusions = builder.StatFusions;
             StatEquipMagic = builder.StatEquipMagic;
             StatChangeField = builder.StatChangeField;
@@ -71,8 +69,6 @@ namespace YuGiOh_Forbidden_Memories_Monitor.DataModel
             CardsUsed = builder.CardsUsed;
             Starchips = builder.Starchips;
         }
-
-        public Builder ToBuilder() => new(this);
 
         public static GameState Empty => new(new Builder
         {
@@ -107,7 +103,6 @@ namespace YuGiOh_Forbidden_Memories_Monitor.DataModel
             public byte StatFaceDowns { get; set; }
             public byte StatPureMagic { get; set; }
             public byte StatTrapsTriggered { get; set; }
-            public byte StatComboPlays { get; set; }
             public byte StatFusions { get; set; }
             public byte StatEquipMagic { get; set; }
             public byte StatChangeField { get; set; }
@@ -119,39 +114,6 @@ namespace YuGiOh_Forbidden_Memories_Monitor.DataModel
             public ushort Starchips { get; set; }
 
             internal Builder() { }
-
-            internal Builder(GameState state)
-            {
-                IsProcessAttached = state.IsProcessAttached;
-                ProcessName = state.ProcessName;
-                ProcessId = state.ProcessId;
-                RamBaseAddress = state.RamBaseAddress;
-                GameVerified = state.GameVerified;
-                MemoryScanLog = state.MemoryScanLog;
-                GameIdText = state.GameIdText;
-                P1LifePoints = state.P1LifePoints;
-                P2LifePoints = state.P2LifePoints;
-                StatValues = state.StatValues != null ? new List<int>(state.StatValues).ToArray() : Array.Empty<int>();
-                ScoreContributions = state.ScoreContributions != null ? new List<int>(state.ScoreContributions).ToArray() : Array.Empty<int>();
-                TotalScore = state.TotalScore;
-                ScoreRank = state.ScoreRank;
-                VictoryConditions = state.VictoryConditions;
-                StatTurns = state.StatTurns;
-                StatEffectiveAttacks = state.StatEffectiveAttacks;
-                StatDefensiveWins = state.StatDefensiveWins;
-                StatFaceDowns = state.StatFaceDowns;
-                StatPureMagic = state.StatPureMagic;
-                StatTrapsTriggered = state.StatTrapsTriggered;
-                StatComboPlays = state.StatComboPlays;
-                StatFusions = state.StatFusions;
-                StatEquipMagic = state.StatEquipMagic;
-                StatChangeField = state.StatChangeField;
-                StatCardDestruction = state.StatCardDestruction;
-                StatDefensiveLoses = state.StatDefensiveLoses;
-                DuelLifePoints = state.DuelLifePoints;
-                CardsUsed = state.CardsUsed;
-                Starchips = state.Starchips;
-            }
 
             public GameState Build() => new(this);
         }

@@ -21,7 +21,6 @@ namespace YuGiOh_Forbidden_Memories_Monitor.DataModel
         public const uint StatFaceDowns = 0x800e9ff4;
         public const uint StatPureMagic = 0x800e9ff5;
         public const uint StatTrapsTriggered = 0x800e9ff6;
-        public const uint StatComboPlays = 0x800e9ff7;
         public const uint StatFusions = 0x800e9ff8;
         public const uint StatEquipMagic = 0x800e9ff9;
         public const uint StatChangeField = 0x800e9ffa;

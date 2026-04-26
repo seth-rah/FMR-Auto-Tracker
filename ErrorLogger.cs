@@ -23,8 +23,13 @@ namespace YuGiOh_Forbidden_Memories_Monitor
                     EventLog.CreateEventSource(EventSourceName, EventLogName);
                 }
             }
-            catch
+            catch (InvalidOperationException)
             {
+                Debug.WriteLine($"[ErrorLogger] Event source already exists or log is unavailable: {EventSourceName}");
+            }
+            catch (SecurityException)
+            {
+                Debug.WriteLine($"[ErrorLogger] Insufficient permissions to create event source: {EventSourceName}");
             }
         }
 
@@ -38,8 +43,13 @@ namespace YuGiOh_Forbidden_Memories_Monitor
             {
                 EventLog.WriteEntry(EventSourceName, message, EventLogEntryType.Error);
             }
-            catch
+            catch (InvalidOperationException ex)
             {
+                Debug.WriteLine($"[ErrorLogger] Failed to write to event log: {ex.Message}");
+            }
+            catch (SecurityException ex)
+            {
+                Debug.WriteLine($"[ErrorLogger] Insufficient permissions to write to event log: {ex.Message}");
             }
         }
     }
