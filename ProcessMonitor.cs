@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using YuGiOh_Forbidden_Memories_Monitor.DataModel;
 using YuGiOh_Forbidden_Memories_Monitor.ProcessHook;
@@ -10,8 +11,12 @@ namespace YuGiOh_Forbidden_Memories_Monitor
 {
     public sealed class ProcessMonitor : IProcessMonitor
     {
-        private const string TargetProcessName = "duckstation-qt";
+        private const string DuckStationProcessName = "duckstation";
+        private const string BizhawkProcessName = "EmuHawk";
         private const uint DefaultRAMBase = 0x80000000;
+
+        private string _preferredEmulator = string.Empty;
+        private string _currentEmulatorType = string.Empty;
 
         private IntPtr _processHandle;
         private ulong _ramBaseAddress;
@@ -30,40 +35,127 @@ namespace YuGiOh_Forbidden_Memories_Monitor
         public event EventHandler<string>? StatusChanged;
         public event EventHandler<string>? ProcessNameChanged;
 
+        public void SetPreferredEmulator(string emulatorType)
+        {
+            _preferredEmulator = emulatorType;
+        }
+
         public bool TryAttachToProcess()
         {
-            var processes = Process.GetProcesses();
+            var (duckstationProcess, bizhawkProcess) = GetAvailableEmulators();
+
+            if (!string.IsNullOrEmpty(_preferredEmulator))
+            {
+                if (_preferredEmulator == "DuckStation" && duckstationProcess != null)
+                {
+                    _currentEmulatorType = "DuckStation";
+                    bool success = AttachToProcess((uint)duckstationProcess.Id, duckstationProcess.ProcessName, "DuckStation");
+                    if (success)
+                    {
+                        StartPolling(16);
+                    }
+                    return success;
+                }
+
+                if (_preferredEmulator == "Bizhawk" && bizhawkProcess != null)
+                {
+                    _currentEmulatorType = "Bizhawk";
+                    bool success = AttachToProcess((uint)bizhawkProcess.Id, bizhawkProcess.ProcessName, "Bizhawk");
+                    if (success)
+                    {
+                        StartPolling(16);
+                    }
+                    return success;
+                }
+            }
+
+            string emulatorName = !string.IsNullOrEmpty(_preferredEmulator) ? _preferredEmulator : "Selected emulator";
+            StatusChanged?.Invoke(this, $"{emulatorName} not found. Waiting...");
+            return false;
+        }
+
+        private (Process? duckstation, Process? bizhawk) GetAvailableEmulators()
+        {
+            var processes = Process.GetProcesses().ToList();
             Process? duckstationProcess = null;
-            
+            Process? bizhawkProcess = null;
+
             foreach (var process in processes)
             {
-                if (process.ProcessName.StartsWith("duckstation", StringComparison.OrdinalIgnoreCase))
+                if (process.ProcessName.StartsWith(DuckStationProcessName, StringComparison.OrdinalIgnoreCase))
                 {
                     duckstationProcess = process;
+                }
+                else if (process.ProcessName.Equals(BizhawkProcessName, StringComparison.OrdinalIgnoreCase))
+                {
+                    bizhawkProcess = process;
+                }
+
+                if (duckstationProcess != null && bizhawkProcess != null)
+                {
                     break;
                 }
             }
-            
-            if (duckstationProcess == null)
-            {
-                StatusChanged?.Invoke(this, "DuckStation not found. Waiting...");
-                return false;
-            }
 
-            bool success = AttachToProcess((uint)duckstationProcess.Id, duckstationProcess.ProcessName);
-            if (success)
-            {
-                StartPolling(16);
-            }
-            return success;
+            return (duckstationProcess, bizhawkProcess);
         }
 
-        public bool AttachToProcess(uint processId, string processName)
+        public string GetCurrentEmulatorType() => _currentEmulatorType;
+
+        public (bool duckstationAvailable, bool bizhawkAvailable) GetAvailableEmulatorsStatus()
+        {
+            var (duckstation, bizhawk) = GetAvailableEmulators();
+            return (duckstation != null, bizhawk != null);
+        }
+
+        public bool TrySwitchToOtherEmulator()
+        {
+            if (!_isAttached)
+            {
+                return TryAttachToProcess();
+            }
+
+            var (duckstation, bizhawk) = GetAvailableEmulators();
+
+            if (_currentEmulatorType == "DuckStation" && bizhawk != null)
+            {
+                DetachNoStatus();
+                return AttachToProcess((uint)bizhawk.Id, bizhawk.ProcessName, "Bizhawk");
+            }
+
+            if (_currentEmulatorType == "Bizhawk" && duckstation != null)
+            {
+                DetachNoStatus();
+                return AttachToProcess((uint)duckstation.Id, duckstation.ProcessName, "DuckStation");
+            }
+
+            Detach();
+            return false;
+        }
+
+        private void DetachNoStatus()
+        {
+            StopPolling();
+
+            if (_processHandle != IntPtr.Zero)
+            {
+                ProcessHook.ProcessHook.CloseProcessHandle(_processHandle);
+                _processHandle = IntPtr.Zero;
+            }
+
+            _dataReader = null;
+            _isAttached = false;
+            CurrentGameState = null;
+            _currentProcessName = string.Empty;
+            _currentEmulatorType = string.Empty;
+        }
+
+        public bool AttachToProcess(uint processId, string processName, string emulatorType)
         {
             var handle = ProcessHook.ProcessHook.OpenProcessHandle(processId);
             if (handle == null)
             {
-                StatusChanged?.Invoke(this, "Failed to open DuckStation process.");
+                StatusChanged?.Invoke(this, $"Failed to open {emulatorType} process.");
                 return false;
             }
 
@@ -86,9 +178,15 @@ namespace YuGiOh_Forbidden_Memories_Monitor
             _dataReader.SetProcessInfo(processId, processName, gameVerified, scanLog);
             _isAttached = true;
             _currentProcessName = processName;
+            _currentEmulatorType = emulatorType;
 
-            ProcessNameChanged?.Invoke(this, processName);
+            ProcessNameChanged?.Invoke(this, $"{emulatorType}: {processName}");
             return true;
+        }
+
+        public bool AttachToProcess(uint processId, string processName)
+        {
+            return AttachToProcess(processId, processName, "Unknown");
         }
 
         public void DiscoverMemoryAddresses()
@@ -167,9 +265,13 @@ namespace YuGiOh_Forbidden_Memories_Monitor
             _dataReader = null;
             _isAttached = false;
             CurrentGameState = null;
+            string emulatorType = _currentEmulatorType;
             _currentProcessName = string.Empty;
+            _currentEmulatorType = string.Empty;
 
-            StatusChanged?.Invoke(this, "Detached from DuckStation.");
+            StatusChanged?.Invoke(this, string.IsNullOrEmpty(emulatorType) 
+                ? "Detached." 
+                : $"Detached from {emulatorType}.");
         }
 
         public void Dispose()

@@ -134,16 +134,11 @@ namespace YuGiOh_Forbidden_Memories_Monitor.DataReader
                 stats, 
                 builder.DuelLifePoints, 
                 builder.CardsUsed, 
-                out int[] contributions, 
-                out int[] victoryScores);
+                out int[] contributions);
 
             builder.TotalScore = score;
             builder.ScoreContributions = contributions;
-            builder.VictoryScores = victoryScores;
             builder.ScoreRank = _scoreCalculator.GetDuelRankFromScore(score);
-            builder.ScoreRankExodia = _scoreCalculator.GetDuelRankFromScore(victoryScores[0]);
-            builder.ScoreRankTotalAnnihilation = _scoreCalculator.GetDuelRankFromScore(victoryScores[1]);
-            builder.ScoreRankAttrition = _scoreCalculator.GetDuelRankFromScore(victoryScores[2]);
         }
 
         private string TryReadString(IntPtr address, int length)

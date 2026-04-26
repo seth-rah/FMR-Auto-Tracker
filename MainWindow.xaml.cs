@@ -35,17 +35,54 @@ namespace YuGiOh_Forbidden_Memories_Monitor
 
             Loaded += OnWindowLoaded;
             Closed += OnWindowClosed;
+
+            EmulatorSelectionPanel.Visibility = Visibility.Visible;
+            AttachDetachButton.Visibility = Visibility.Collapsed;
+        }
+
+        private string _selectedEmulator = string.Empty;
+
+        private void SelectDuckStation_Click(object sender, RoutedEventArgs e)
+        {
+            _selectedEmulator = "DuckStation";
+            EmulatorSelectionPanel.Visibility = Visibility.Collapsed;
+            AttachDetachButton.Visibility = Visibility.Visible;
+            AttachDetachButton.Content = "Attach";
+            AttachDetachButton.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4CAF50"));
+
+            _processMonitor?.SetPreferredEmulator("DuckStation");
+            _processMonitor?.TryAttachToProcess();
+            _uiTimer?.Start();
+            _isAttached = _processMonitor?.IsAttached ?? false;
+            if (_isAttached)
+            {
+                AttachDetachButton.Content = "Detach";
+                AttachDetachButton.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F44336"));
+            }
+        }
+
+        private void SelectBizhawk_Click(object sender, RoutedEventArgs e)
+        {
+            _selectedEmulator = "Bizhawk";
+            EmulatorSelectionPanel.Visibility = Visibility.Collapsed;
+            AttachDetachButton.Visibility = Visibility.Visible;
+            AttachDetachButton.Content = "Attach";
+            AttachDetachButton.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4CAF50"));
+
+            _processMonitor?.SetPreferredEmulator("Bizhawk");
+            _processMonitor?.TryAttachToProcess();
+            _uiTimer?.Start();
+            _isAttached = _processMonitor?.IsAttached ?? false;
+            if (_isAttached)
+            {
+                AttachDetachButton.Content = "Detach";
+                AttachDetachButton.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F44336"));
+            }
         }
 
         private void OnWindowLoaded(object sender, RoutedEventArgs e)
         {
-            if (_processMonitor != null)
-            {
-                _processMonitor.TryAttachToProcess();
-                _processMonitor.StartPolling(16);
-                _uiTimer?.Start();
-                UpdateUI();
-            }
+            StatusText.Text = "Select an emulator to attach to";
         }
 
         private void OnWindowClosed(object? sender, EventArgs e)
@@ -69,11 +106,17 @@ namespace YuGiOh_Forbidden_Memories_Monitor
                     AttachDetachButton.Content = "Detach";
                     AttachDetachButton.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F44336"));
                 }
-                else if (status.Contains("DuckStation not found"))
+                else if (status.Contains("Detached"))
                 {
                     _isAttached = false;
                     AttachDetachButton.Content = "Attach";
                     AttachDetachButton.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4CAF50"));
+                }
+                else if (status.Contains("not found") || status.Contains("No emulator"))
+                {
+                    _isAttached = false;
+                    AttachDetachButton.Content = "Detach";
+                    AttachDetachButton.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#F44336"));
                 }
             });
         }
@@ -261,11 +304,6 @@ namespace YuGiOh_Forbidden_Memories_Monitor
             sb.AppendLine($"  CMB: {gameState.StatComboPlays} -> {gameState.ScoreContributions[9]}");
             sb.AppendLine($"  LP: {gameState.DuelLifePoints} -> {gameState.ScoreContributions[10]}");
             sb.AppendLine();
-            sb.AppendLine("Victory ranks (if applicable at duel end):");
-            sb.AppendLine($"  Exodia Win (+40): {gameState.ScoreRankExodia}");
-            sb.AppendLine($"  Total Annihilation (+2): {gameState.ScoreRankTotalAnnihilation}");
-            sb.AppendLine($"  Attrition (-40): {gameState.ScoreRankAttrition}");
-            sb.AppendLine();
             sb.AppendLine("Rank scale: S POW:99-90 | A POW:89-80 | B POW:79-70 | C POW:69-60 | D POW:59-50");
             sb.AppendLine("            D TEC:49-40 | C TEC:39-30 | B TEC:29-20 | A TEC:19-10 | S TEC:09-00");
 
@@ -276,13 +314,11 @@ namespace YuGiOh_Forbidden_Memories_Monitor
 
         private void AttachDetachButton_Click(object sender, RoutedEventArgs e)
         {
-            if (_isAttached)
+            if (AttachDetachButton.Content.ToString() == "Detach")
             {
                 _processMonitor?.Detach();
                 ClearUI();
                 _isAttached = false;
-                AttachDetachButton.Content = "Attach";
-                AttachDetachButton.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4CAF50"));
             }
             else
             {
@@ -305,10 +341,93 @@ namespace YuGiOh_Forbidden_Memories_Monitor
                 P1LifePointsText.Text = "--";
                 P2LifePointsText.Text = "--";
                 DuelScoreText.Text = "-- = --";
+                StarchipsText.Text = "--";
+                ResetTableCells();
                 _isAttached = false;
+                _selectedEmulator = string.Empty;
                 AttachDetachButton.Content = "Attach";
                 AttachDetachButton.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#4CAF50"));
+                AttachDetachButton.Visibility = Visibility.Collapsed;
+                EmulatorSelectionPanel.Visibility = Visibility.Visible;
+                StatusText.Text = "Select an emulator to attach to";
             });
+        }
+
+        private void ResetTableCells()
+        {
+            var defaultBg = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2a2a3a"));
+            var defaultFg = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#666666"));
+
+            void ResetCell(Border cell, TextBlock range, TextBlock score, string rangeText, string scoreText)
+            {
+                cell.Background = defaultBg;
+                range.Text = rangeText;
+                range.Foreground = defaultFg;
+                range.FontWeight = FontWeights.Normal;
+                score.Text = scoreText;
+                score.Foreground = defaultFg;
+                score.FontWeight = FontWeights.Normal;
+            }
+
+            ResetCell(CardsUsedCell1, CardsUsedRange1, CardsUsedScore1, "0-8", "+15");
+            ResetCell(CardsUsedCell2, CardsUsedRange2, CardsUsedScore2, "9-12", "+12");
+            ResetCell(CardsUsedCell3, CardsUsedRange3, CardsUsedScore3, "13-32", "+0");
+            ResetCell(CardsUsedCell4, CardsUsedRange4, CardsUsedScore4, "33-36", "-5");
+            ResetCell(CardsUsedCell5, CardsUsedRange5, CardsUsedScore5, "37+", "-7");
+
+            ResetCell(TurnsCell1, TurnsRange1, TurnsScore1, "0-4", "+12");
+            ResetCell(TurnsCell2, TurnsRange2, TurnsScore2, "5-8", "+8");
+            ResetCell(TurnsCell3, TurnsRange3, TurnsScore3, "9-28", "+0");
+            ResetCell(TurnsCell4, TurnsRange4, TurnsScore4, "29-32", "-8");
+            ResetCell(TurnsCell5, TurnsRange5, TurnsScore5, "33+", "-12");
+
+            ResetCell(AtkCell1, AtkRange1, AtkScore1, "0-1", "+4");
+            ResetCell(AtkCell2, AtkRange2, AtkScore2, "2-3", "+2");
+            ResetCell(AtkCell3, AtkRange3, AtkScore3, "4-9", "+0");
+            ResetCell(AtkCell4, AtkRange4, AtkScore4, "10-19", "-2");
+            ResetCell(AtkCell5, AtkRange5, AtkScore5, "20+", "-4");
+
+            ResetCell(DefWinsCell1, DefWinsRange1, DefWinsScore1, "0-1", "+0");
+            ResetCell(DefWinsCell2, DefWinsRange2, DefWinsScore2, "2-5", "-10");
+            ResetCell(DefWinsCell3, DefWinsRange3, DefWinsScore3, "6-9", "-20");
+            ResetCell(DefWinsCell4, DefWinsRange4, DefWinsScore4, "10-14", "-30");
+            ResetCell(DefWinsCell5, DefWinsRange5, DefWinsScore5, "15+", "-40");
+
+            ResetCell(FaceDownCell1, FaceDownRange1, FaceDownScore1, "0", "+0");
+            ResetCell(FaceDownCell2, FaceDownRange2, FaceDownScore2, "1-10", "-2");
+            ResetCell(FaceDownCell3, FaceDownRange3, FaceDownScore3, "11-20", "-4");
+            ResetCell(FaceDownCell4, FaceDownRange4, FaceDownScore4, "21-30", "-6");
+            ResetCell(FaceDownCell5, FaceDownRange5, FaceDownScore5, "31+", "-8");
+
+            ResetCell(FusionCell1, FusionRange1, FusionScore1, "0", "+4");
+            ResetCell(FusionCell2, FusionRange2, FusionScore2, "1-4", "+0");
+            ResetCell(FusionCell3, FusionRange3, FusionScore3, "5-9", "-4");
+            ResetCell(FusionCell4, FusionRange4, FusionScore4, "10-14", "-8");
+            ResetCell(FusionCell5, FusionRange5, FusionScore5, "15+", "-12");
+
+            ResetCell(EquipCell1, EquipRange1, EquipScore1, "0", "+4");
+            ResetCell(EquipCell2, EquipRange2, EquipScore2, "1-4", "+0");
+            ResetCell(EquipCell3, EquipRange3, EquipScore3, "5-9", "-4");
+            ResetCell(EquipCell4, EquipRange4, EquipScore4, "10-14", "-8");
+            ResetCell(EquipCell5, EquipRange5, EquipScore5, "15+", "-12");
+
+            ResetCell(MagicCell1, MagicRange1, MagicScore1, "0", "+2");
+            ResetCell(MagicCell2, MagicRange2, MagicScore2, "1-3", "-4");
+            ResetCell(MagicCell3, MagicRange3, MagicScore3, "4-6", "-8");
+            ResetCell(MagicCell4, MagicRange4, MagicScore4, "7-9", "-12");
+            ResetCell(MagicCell5, MagicRange5, MagicScore5, "10+", "-16");
+
+            ResetCell(TrapCell1, TrapRange1, TrapScore1, "0", "+2");
+            ResetCell(TrapCell2, TrapRange2, TrapScore2, "1-2", "-8");
+            ResetCell(TrapCell3, TrapRange3, TrapScore3, "3-4", "-16");
+            ResetCell(TrapCell4, TrapRange4, TrapScore4, "5-6", "-24");
+            ResetCell(TrapCell5, TrapRange5, TrapScore5, "7+", "-32");
+
+            ResetCell(LPCell1, LPRange1, LPScore1, "8000+", "+6");
+            ResetCell(LPCell2, LPRange2, LPScore2, "7000-7999", "+4");
+            ResetCell(LPCell3, LPRange3, LPScore3, "1000-6999", "+0");
+            ResetCell(LPCell4, LPRange4, LPScore4, "100-999", "-5");
+            ResetCell(LPCell5, LPRange5, LPScore5, "0-99", "-7");
         }
         
         private static string FormatScore(int score)

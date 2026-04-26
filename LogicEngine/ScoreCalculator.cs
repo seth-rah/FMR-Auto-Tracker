@@ -22,10 +22,9 @@ namespace YuGiOh_Forbidden_Memories_Monitor.LogicEngine
             new(-50, 9, "S", "TEC")
         };
 
-        public int CalculateRankScore(int[] stats, ushort lp, ushort cardsUsed, out int[] contributions, out int[] victoryScores)
+        public int CalculateRankScore(int[] stats, ushort lp, ushort cardsUsed, out int[] contributions)
         {
             contributions = new int[11];
-            victoryScores = new int[3];
             
             int score = BaseScore;
             
@@ -58,10 +57,6 @@ namespace YuGiOh_Forbidden_Memories_Monitor.LogicEngine
             
             contributions[10] = EvaluateStat(ScoreTierRegistry.LifePoints, lp);
             score += contributions[10];
-            
-            victoryScores[0] = score + 40;
-            victoryScores[1] = score + 2;
-            victoryScores[2] = score - 40;
             
             return score;
         }

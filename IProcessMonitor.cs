@@ -32,5 +32,13 @@ namespace YuGiOh_Forbidden_Memories_Monitor
         void UpdateP1LifePointsAddress(uint address);
         
         void UpdateP2LifePointsAddress(uint address);
+
+        string GetCurrentEmulatorType();
+
+        void SetPreferredEmulator(string emulatorType);
+
+        (bool duckstationAvailable, bool bizhawkAvailable) GetAvailableEmulatorsStatus();
+
+        bool TrySwitchToOtherEmulator();
     }
 }

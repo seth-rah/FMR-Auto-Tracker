@@ -19,6 +19,14 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,0,15">
+            <StackPanel x:Name="EmulatorSelectionPanel" Margin="0,0,0,15">
+                <TextBlock Text="Select Emulator" Foreground="#FFC107" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="SelectDuckStationButton" Content="DuckStation" Width="120" Height="40" Click="SelectDuckStation_Click" Background="#4CAF50" Foreground="White" FontWeight="Bold" Margin="0,0,10,0"/>
+                    <Button x:Name="SelectBizhawkButton" Content="Bizhawk" Width="120" Height="40" Click="SelectBizhawk_Click" Background="#2196F3" Foreground="White" FontWeight="Bold"/>
+                </StackPanel>
+            </StackPanel>
+
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>

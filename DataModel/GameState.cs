@@ -19,11 +19,7 @@ namespace YuGiOh_Forbidden_Memories_Monitor.DataModel
         public IReadOnlyList<int> StatValues { get; }
         public IReadOnlyList<int> ScoreContributions { get; }
         public int TotalScore { get; }
-        public IReadOnlyList<int> VictoryScores { get; }
         public string ScoreRank { get; }
-        public string ScoreRankExodia { get; }
-        public string ScoreRankTotalAnnihilation { get; }
-        public string ScoreRankAttrition { get; }
 
         public byte VictoryConditions { get; }
         public byte StatTurns { get; }
@@ -57,11 +53,7 @@ namespace YuGiOh_Forbidden_Memories_Monitor.DataModel
             StatValues = builder.StatValues;
             ScoreContributions = builder.ScoreContributions;
             TotalScore = builder.TotalScore;
-            VictoryScores = builder.VictoryScores;
             ScoreRank = builder.ScoreRank;
-            ScoreRankExodia = builder.ScoreRankExodia;
-            ScoreRankTotalAnnihilation = builder.ScoreRankTotalAnnihilation;
-            ScoreRankAttrition = builder.ScoreRankAttrition;
             VictoryConditions = builder.VictoryConditions;
             StatTurns = builder.StatTurns;
             StatEffectiveAttacks = builder.StatEffectiveAttacks;
@@ -87,10 +79,7 @@ namespace YuGiOh_Forbidden_Memories_Monitor.DataModel
             IsProcessAttached = false,
             ProcessName = string.Empty,
             RamBaseAddress = MemoryMap.KSEG0_BASE,
-            ScoreRank = "--",
-            ScoreRankExodia = "--",
-            ScoreRankTotalAnnihilation = "--",
-            ScoreRankAttrition = "--"
+            ScoreRank = "--"
         });
 
         public sealed class Builder
@@ -109,11 +98,7 @@ namespace YuGiOh_Forbidden_Memories_Monitor.DataModel
             public int[] StatValues { get; set; } = Array.Empty<int>();
             public int[] ScoreContributions { get; set; } = Array.Empty<int>();
             public int TotalScore { get; set; }
-            public int[] VictoryScores { get; set; } = Array.Empty<int>();
             public string ScoreRank { get; set; } = "--";
-            public string ScoreRankExodia { get; set; } = "--";
-            public string ScoreRankTotalAnnihilation { get; set; } = "--";
-            public string ScoreRankAttrition { get; set; } = "--";
 
             public byte VictoryConditions { get; set; }
             public byte StatTurns { get; set; }
@@ -149,11 +134,7 @@ namespace YuGiOh_Forbidden_Memories_Monitor.DataModel
                 StatValues = state.StatValues != null ? new List<int>(state.StatValues).ToArray() : Array.Empty<int>();
                 ScoreContributions = state.ScoreContributions != null ? new List<int>(state.ScoreContributions).ToArray() : Array.Empty<int>();
                 TotalScore = state.TotalScore;
-                VictoryScores = state.VictoryScores != null ? new List<int>(state.VictoryScores).ToArray() : Array.Empty<int>();
                 ScoreRank = state.ScoreRank;
-                ScoreRankExodia = state.ScoreRankExodia;
-                ScoreRankTotalAnnihilation = state.ScoreRankTotalAnnihilation;
-                ScoreRankAttrition = state.ScoreRankAttrition;
                 VictoryConditions = state.VictoryConditions;
                 StatTurns = state.StatTurns;
                 StatEffectiveAttacks = state.StatEffectiveAttacks;
